@@ -1,6 +1,6 @@
 # Jira MCP Server
 
-[![npm version](https://badge.fury.io/js/jira-mcp-server.svg)](https://badge.fury.io/js/jira-mcp-server)
+[![npm version](https://badge.fury.io/js/raalarcon-jira-mcp-server.svg)](https://badge.fury.io/js/raalarcon-jira-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
@@ -40,7 +40,7 @@ The easiest way to use this MCP server is with `npx`:
   "mcpServers": {
     "jira": {
       "command": "npx",
-      "args": ["jira-mcp-server"],
+      "args": ["-y", "raalarcon-jira-mcp-server"],
       "env": {
         "JIRA_HOST": "https://your-domain.atlassian.net",
         "JIRA_EMAIL": "your-email@example.com",
@@ -129,7 +129,7 @@ npx raalarcon-jira-mcp-server
 
 # Or use with MCP Inspector
 npx @modelcontextprotocol/inspector
-# Then configure: command: "npx", args: ["jira-mcp-server"]
+# Then configure: command: "npx", args: ["-y", "raalarcon-jira-mcp-server"]
 ```
 
 ## Available Tools
@@ -801,7 +801,7 @@ To publish this MCP server to npm for distribution:
    npm publish
    ```
 
-The package will be available as `jira-mcp-server` and users can install it with:
+The package will be available as `raalarcon-jira-mcp-server` and users can install it with:
 ```bash
 npx raalarcon-jira-mcp-server
 ```

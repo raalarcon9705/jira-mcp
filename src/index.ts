@@ -20,7 +20,7 @@ class JiraMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'jira-mcp-server',
+        name: 'raalarcon-jira-mcp-server',
         version: '1.0.0',
       },
       {

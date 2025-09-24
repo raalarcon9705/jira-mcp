@@ -2,7 +2,7 @@
   "mcpServers": {
     "jira": {
       "command": "npx",
-      "args": ["jira-mcp-server"],
+      "args": ["-y", "raalarcon-jira-mcp-server"],
       "env": {
         "JIRA_HOST": "https://your-domain.atlassian.net",
         "JIRA_EMAIL": "your-email@example.com",

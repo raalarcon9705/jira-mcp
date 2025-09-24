@@ -40,7 +40,7 @@ npm pack --dry-run
 
 # Ask for confirmation
 echo ""
-echo "Are you sure you want to publish jira-mcp-server@$(node -p "require('./package.json').version") to npm? (y/N)"
+echo "Are you sure you want to publish raalarcon-jira-mcp-server@$(node -p "require('./package.json').version") to npm? (y/N)"
 read -r response
 
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
@@ -53,10 +53,10 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         echo "🎉 Your MCP server is now available on npm!"
         echo ""
         echo "Users can use it with:"
-        echo "  npx jira-mcp-server"
+        echo "  npx raalarcon-jira-mcp-server"
         echo ""
         echo "Or configure it in their MCP client with:"
-        echo '  "command": "npx", "args": ["jira-mcp-server"]'
+        echo '  "command": "npx", "args": ["-y", "raalarcon-jira-mcp-server"]'
     else
         echo "❌ Error: Publication failed."
         exit 1
