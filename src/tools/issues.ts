@@ -7,7 +7,8 @@ import {
   deleteIssueSchema,
 } from '../schemas/index.js';
 
-export function createIssueTools(jiraClient: JiraClient): Tool[] {
+
+export function createIssueTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'create_issue',
@@ -158,14 +159,14 @@ export function createIssueTools(jiraClient: JiraClient): Tool[] {
 
 export async function handleIssueTool(
   name: string,
-  args: any,
+  args: Record<string, unknown>,
   jiraClient: JiraClient
-): Promise<any> {
+) {
   switch (name) {
     case 'create_issue': {
       const validatedArgs = await createIssueSchema.validate(args);
       const issue = await jiraClient.createIssue(validatedArgs);
-      
+
       return {
         content: [
           {
@@ -179,7 +180,7 @@ export async function handleIssueTool(
     case 'get_issue': {
       const validatedArgs = await getIssueSchema.validate(args);
       const issue = await jiraClient.getIssue(validatedArgs);
-      
+
       // Remove custom fields to reduce token usage
       const cleanIssue = JSON.parse(JSON.stringify(issue, (key, value) => {
         if (key.startsWith('customfield_')) {
@@ -187,7 +188,7 @@ export async function handleIssueTool(
         }
         return value;
       }));
-      
+
       return {
         content: [
           {
@@ -200,8 +201,8 @@ export async function handleIssueTool(
 
     case 'update_issue': {
       const validatedArgs = await updateIssueSchema.validate(args);
-      const result = await jiraClient.updateIssue(validatedArgs);
-      
+      const _result = await jiraClient.updateIssue(validatedArgs);
+
       return {
         content: [
           {
@@ -214,8 +215,8 @@ export async function handleIssueTool(
 
     case 'delete_issue': {
       const validatedArgs = await deleteIssueSchema.validate(args);
-      const result = await jiraClient.deleteIssue(validatedArgs);
-      
+      const _result = await jiraClient.deleteIssue(validatedArgs);
+
       return {
         content: [
           {

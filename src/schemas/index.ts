@@ -1,4 +1,8 @@
 import * as yup from 'yup';
+import { AddComment } from 'jira.js/dist/esm/types/version3/parameters/addComment.js';
+
+// ADF (Atlassian Document Format) type
+export type ADFDocument = AddComment['comment'];
 
 // Schema for creating an issue
 export const createIssueSchema = yup.object({
@@ -32,7 +36,7 @@ export const createCommentSchema = yup.object({
   issueKey: yup.string().required('Issue key is required'),
   body: yup.mixed()
     .required('Comment body is required')
-    .test('is-valid-body', 'Body must be a string or valid ADF JSON', function(value) {
+    .test('is-valid-body', 'Body must be a string or valid ADF JSON', function (value) {
       // If it's a string, check if it's valid JSON
       if (typeof value === 'string') {
         // If it's a simple string (not JSON), it's fine
@@ -50,11 +54,12 @@ export const createCommentSchema = yup.object({
       }
       // If it's an object, verify ADF structure
       if (typeof value === 'object' && value !== null) {
-        return (value as any).type === 'doc' && (value as any).version === 1;
+        const adfValue = value as ADFDocument;
+        return adfValue && typeof adfValue === 'object' && adfValue.type === 'doc' && adfValue.version === 1;
       }
       return false;
     })
-    .transform(function(value) {
+    .transform(function (value) {
       // If it's a string that looks like JSON, parse it
       if (typeof value === 'string' && value.trim().startsWith('{')) {
         try {
@@ -76,7 +81,7 @@ export const transitionIssueSchema = yup.object({
   issueKey: yup.string().required('Issue key is required'),
   transitionId: yup.mixed()
     .required('Transition ID is required')
-    .transform(function(value) {
+    .transform(function (value) {
       // Convert to string if it's a number
       return String(value);
     }),
@@ -140,7 +145,7 @@ export const updateCommentSchema = yup.object({
   commentId: yup.string().required('Comment ID is required'),
   body: yup.mixed()
     .required('Comment body is required')
-    .test('is-valid-body', 'Body must be a string or valid ADF JSON', function(value) {
+    .test('is-valid-body', 'Body must be a string or valid ADF JSON', function (value) {
       // If it's a string, check if it's valid JSON
       if (typeof value === 'string') {
         // If it's a simple string (not JSON), it's fine
@@ -158,11 +163,12 @@ export const updateCommentSchema = yup.object({
       }
       // If it's an object, verify ADF structure
       if (typeof value === 'object' && value !== null) {
-        return (value as any).type === 'doc' && (value as any).version === 1;
+        const adfValue = value as ADFDocument;
+        return adfValue && typeof adfValue === 'object' && adfValue.type === 'doc' && adfValue.version === 1;
       }
       return false;
     })
-    .transform(function(value) {
+    .transform(function (value) {
       // If it's a string that looks like JSON, parse it
       if (typeof value === 'string' && value.trim().startsWith('{')) {
         try {

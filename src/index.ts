@@ -61,32 +61,32 @@ class JiraMCPServer {
       try {
         // Route to appropriate tool handler
         if (name.startsWith('get_projects') || name.startsWith('get_issue_types')) {
-          return await handleProjectTool(name, args, this.jiraClient);
+          return await handleProjectTool(name, args || {}, this.jiraClient);
         } else if (
           name.startsWith('create_issue') ||
           name.startsWith('get_issue') ||
           name.startsWith('update_issue') ||
           name.startsWith('delete_issue')
         ) {
-          return await handleIssueTool(name, args, this.jiraClient);
+          return await handleIssueTool(name, args || {}, this.jiraClient);
         } else if (
           name.startsWith('create_comment') ||
           name.startsWith('get_comments') ||
           name.startsWith('update_comment') ||
           name.startsWith('delete_comment')
         ) {
-          return await handleCommentTool(name, args, this.jiraClient);
+          return await handleCommentTool(name, args || {}, this.jiraClient);
         } else if (
           name.startsWith('get_transitions') ||
           name.startsWith('transition_issue')
         ) {
-          return await handleTransitionTool(name, args, this.jiraClient);
+          return await handleTransitionTool(name, args || {}, this.jiraClient);
         } else if (
           name.startsWith('assign_issue') ||
           name.startsWith('get_users') ||
           name.startsWith('get_current_user')
         ) {
-          return await handleAssignmentTool(name, args, this.jiraClient);
+          return await handleAssignmentTool(name, args || {}, this.jiraClient);
         } else {
           throw new Error(`Unknown tool: ${name}`);
         }

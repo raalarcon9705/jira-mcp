@@ -1,0 +1,44 @@
+# Source files
+src/
+*.ts
+tsconfig.json
+
+# Development files
+.env
+.env.example
+*.log
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Node modules
+node_modules/
+
+# Development configs
+mcp-config-example.json
+mcp-config-npx.json
+
+# GitHub files
+.github/
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+# TODO and development notes
+TODO.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts

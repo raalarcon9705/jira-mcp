@@ -1,5 +1,15 @@
 import { Version3Client } from 'jira.js';
 import { config } from 'dotenv';
+
+// Type for Jira API errors
+interface JiraError extends Error {
+  status?: number;
+  statusText?: string;
+  response?: {
+    data?: unknown;
+  };
+}
+
 import type {
   CreateIssueInput,
   UpdateIssueInput,
@@ -19,6 +29,7 @@ import type {
 import { AddComment } from 'jira.js/dist/esm/types/version3/parameters/addComment.js';
 import { UpdateComment } from 'jira.js/dist/esm/types/version3/parameters/updateComment.js';
 import { CreateIssue } from 'jira.js/dist/esm/types/version3/parameters/createIssue.js';
+import { IssueUpdateDetails } from 'jira.js/dist/esm/types/version3/models/issueUpdateDetails.js';
 
 // Load environment variables
 config();
@@ -134,7 +145,7 @@ export class JiraClient {
   // Update an issue
   async updateIssue(input: UpdateIssueInput) {
     try {
-      const updateData: any = {
+      const updateData: { fields: Record<string, unknown> } = {
         fields: {},
       };
 
@@ -209,21 +220,21 @@ export class JiraClient {
   // Move issue to another state
   async transitionIssue(input: TransitionIssueInput) {
     try {
-      const transitionData: any = {
-        transition: { id: parseInt(String(input.transitionId)) },
+      const transitionData: IssueUpdateDetails = {
+        transition: { id: String(input.transitionId) },
       };
 
       if (input.comment) {
         // Use official ADF format for transition comments
         const adfBody = {
           version: 1,
-          type: "doc",
+          type: 'doc',
           content: [
             {
-              type: "paragraph",
+              type: 'paragraph',
               content: [
                 {
-                  type: "text",
+                  type: 'text',
                   text: input.comment
                 }
               ]
@@ -250,14 +261,14 @@ export class JiraClient {
         issueIdOrKey: input.issueKey,
         ...transitionData,
       });
-      
+
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorDetails = {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        response: error.response?.data,
+        message: (error as Error).message,
+        status: (error as JiraError).status,
+        statusText: (error as JiraError).statusText,
+        response: (error as JiraError).response?.data,
         request: {
           issueKey: input.issueKey,
           transitionId: input.transitionId,
@@ -293,13 +304,13 @@ export class JiraClient {
       if (typeof input.body === 'string') {
         adfBody = {
           version: 1,
-          type: "doc",
+          type: 'doc',
           content: [
             {
-              type: "paragraph",
+              type: 'paragraph',
               content: [
                 {
-                  type: "text",
+                  type: 'text',
                   text: input.body
                 }
               ]
@@ -317,12 +328,12 @@ export class JiraClient {
         comment: adfBody
       });
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorDetails = {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        response: error.response?.data,
+        message: (error as Error).message,
+        status: (error as JiraError).status,
+        statusText: (error as JiraError).statusText,
+        response: (error as JiraError).response?.data,
         request: {
           issueKey: input.issueKey,
           body: input.body,
@@ -356,13 +367,13 @@ export class JiraClient {
       if (typeof input.body === 'string') {
         adfBody = {
           version: 1,
-          type: "doc",
+          type: 'doc',
           content: [
             {
-              type: "paragraph",
+              type: 'paragraph',
               content: [
                 {
-                  type: "text",
+                  type: 'text',
                   text: input.body
                 }
               ]
@@ -381,12 +392,12 @@ export class JiraClient {
         visibility: input.visibility,
       });
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorDetails = {
-        message: error.message,
-        status: error.status,
-        statusText: error.statusText,
-        response: error.response?.data,
+        message: (error as Error).message,
+        status: (error as JiraError).status,
+        statusText: (error as JiraError).statusText,
+        response: (error as JiraError).response?.data,
         request: {
           issueKey: input.issueKey,
           commentId: input.commentId,

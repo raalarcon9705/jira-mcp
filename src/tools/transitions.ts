@@ -5,7 +5,8 @@ import {
   transitionIssueSchema,
 } from '../schemas/index.js';
 
-export function createTransitionTools(jiraClient: JiraClient): Tool[] {
+
+export function createTransitionTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'get_transitions',
@@ -31,10 +32,10 @@ export function createTransitionTools(jiraClient: JiraClient): Tool[] {
             type: 'string',
             description: 'The issue key to transition',
           },
-             transitionId: {
-               type: 'number',
-               description: 'The ID of the transition to perform (will be converted to string automatically)',
-             },
+          transitionId: {
+            type: 'number',
+            description: 'The ID of the transition to perform (will be converted to string automatically)',
+          },
           comment: {
             type: 'string',
             description: 'Optional comment to add during transition',
@@ -52,14 +53,14 @@ export function createTransitionTools(jiraClient: JiraClient): Tool[] {
 
 export async function handleTransitionTool(
   name: string,
-  args: any,
+  args: Record<string, unknown>,
   jiraClient: JiraClient
-): Promise<any> {
+) {
   switch (name) {
     case 'get_transitions': {
       const validatedArgs = await getTransitionsSchema.validate(args);
       const transitions = await jiraClient.getTransitions(validatedArgs);
-      
+
       // Extract essential fields, add description, improve syntax
       const transitionsData = transitions;
       const essentialTransitions = transitionsData.transitions?.map((transition) => ({
@@ -71,7 +72,7 @@ export async function handleTransitionTool(
         available: transition.isAvailable,
         category: transition.to?.statusCategory?.name // Shorter field name
       })) || [];
-      
+
       return {
         content: [
           {
@@ -84,7 +85,7 @@ export async function handleTransitionTool(
 
     case 'transition_issue': {
       const validatedArgs = await transitionIssueSchema.validate(args);
-      const result = await jiraClient.transitionIssue(validatedArgs);
+      const _result = await jiraClient.transitionIssue(validatedArgs);
       return {
         content: [
           {

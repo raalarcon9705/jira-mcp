@@ -5,7 +5,8 @@ import {
   getUsersSchema,
 } from '../schemas/index.js';
 
-export function createAssignmentTools(jiraClient: JiraClient): Tool[] {
+
+export function createAssignmentTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'assign_issue',
@@ -60,13 +61,13 @@ export function createAssignmentTools(jiraClient: JiraClient): Tool[] {
 
 export async function handleAssignmentTool(
   name: string,
-  args: any,
+  args: Record<string, unknown>,
   jiraClient: JiraClient
-): Promise<any> {
+) {
   switch (name) {
     case 'assign_issue': {
       const validatedArgs = await assignIssueSchema.validate(args);
-      const result = await jiraClient.assignIssue(validatedArgs);
+      const _result = await jiraClient.assignIssue(validatedArgs);
       return {
         content: [
           {
@@ -80,7 +81,7 @@ export async function handleAssignmentTool(
     case 'get_users': {
       const validatedArgs = await getUsersSchema.validate(args);
       const users = await jiraClient.getUsers(validatedArgs);
-      
+
       // Extract essential fields, improve syntax
       const essentialUsers = users.map((user) => ({
         id: user.accountId, // Shorter field name
@@ -89,7 +90,7 @@ export async function handleAssignmentTool(
         active: user.active,
         type: user.accountType // Shorter field name
       }));
-      
+
       return {
         content: [
           {
@@ -102,7 +103,7 @@ export async function handleAssignmentTool(
 
     case 'get_current_user': {
       const user = await jiraClient.getCurrentUser();
-      
+
       // Extract essential fields, improve syntax
       const userData = user;
       const essentialUser = {
@@ -113,7 +114,7 @@ export async function handleAssignmentTool(
         timezone: userData.timeZone, // Shorter field name
         type: userData.accountType // Shorter field name
       };
-      
+
       return {
         content: [
           {

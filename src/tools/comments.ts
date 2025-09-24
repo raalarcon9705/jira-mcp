@@ -7,7 +7,8 @@ import {
   deleteCommentSchema,
 } from '../schemas/index.js';
 
-export function createCommentTools(jiraClient: JiraClient): Tool[] {
+
+export function createCommentTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'create_comment',
@@ -126,9 +127,9 @@ export function createCommentTools(jiraClient: JiraClient): Tool[] {
 
 export async function handleCommentTool(
   name: string,
-  args: any,
+  args: Record<string, unknown>,
   jiraClient: JiraClient
-): Promise<any> {
+) {
   switch (name) {
     case 'create_comment': {
       const validatedArgs = await createCommentSchema.validate(args);
@@ -146,7 +147,7 @@ export async function handleCommentTool(
     case 'get_comments': {
       const validatedArgs = await getCommentsSchema.validate(args);
       const comments = await jiraClient.getComments(validatedArgs);
-      
+
       // Extract essential fields, improve syntax
       const commentsData = comments;
       const essentialComments = {
@@ -161,7 +162,7 @@ export async function handleCommentTool(
           text: comment.body?.content?.[0]?.content?.[0]?.text || '' // Extract text content
         })) || []
       };
-      
+
       return {
         content: [
           {
@@ -187,7 +188,7 @@ export async function handleCommentTool(
 
     case 'delete_comment': {
       const validatedArgs = await deleteCommentSchema.validate(args);
-      const result = await jiraClient.deleteComment(validatedArgs);
+      const _result = await jiraClient.deleteComment(validatedArgs);
       return {
         content: [
           {

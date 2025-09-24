@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "jira": {
-      "command": "node",
-      "args": ["/full/path/to/project/dist/index.js"],
+      "command": "npx",
+      "args": ["jira-mcp-server"],
       "env": {
         "JIRA_HOST": "https://your-domain.atlassian.net",
         "JIRA_EMAIL": "your-email@example.com",

@@ -2,7 +2,8 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { JiraClient } from '../jira-client.js';
 import { getProjectsSchema, getIssueTypesSchema } from '../schemas/index.js';
 
-export function createProjectTools(jiraClient: JiraClient): Tool[] {
+
+export function createProjectTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'get_projects',
@@ -40,14 +41,14 @@ export function createProjectTools(jiraClient: JiraClient): Tool[] {
 
 export async function handleProjectTool(
   name: string,
-  args: any,
+  args: Record<string, unknown>,
   jiraClient: JiraClient
-): Promise<any> {
+) {
   switch (name) {
     case 'get_projects': {
       const validatedArgs = await getProjectsSchema.validate(args);
       const projects = await jiraClient.getProjects(validatedArgs);
-      
+
       // Extract only essential fields to reduce token usage
       const pageProject = projects;
       const essentialProjects = pageProject.values?.map((project) => ({
@@ -56,7 +57,7 @@ export async function handleProjectTool(
         id: project.id,
         projectTypeKey: project.projectTypeKey
       })) || [];
-      
+
       return {
         content: [
           {
@@ -70,7 +71,7 @@ export async function handleProjectTool(
     case 'get_issue_types': {
       const validatedArgs = await getIssueTypesSchema.validate(args);
       const issueTypes = await jiraClient.getIssueTypes(validatedArgs);
-      
+
       // Extract essential fields, remove iconUrl, improve text syntax
       const essentialTypes = issueTypes?.map((type) => ({
         id: type.id,
@@ -79,7 +80,7 @@ export async function handleProjectTool(
         subtask: type.subtask,
         level: type.hierarchyLevel // Shorter field name
       }));
-      
+
       return {
         content: [
           {

@@ -1,6 +1,18 @@
 # Jira MCP Server
 
-A complete MCP (Model Context Protocol) server for integrating Jira/Atlassian with AI applications. This server provides all main Jira dashboard functionalities through a unified API with optimized responses for token efficiency.
+[![npm version](https://badge.fury.io/js/jira-mcp-server.svg)](https://badge.fury.io/js/jira-mcp-server)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io/)
+[![CI/CD](https://github.com/raalarcon9705/jira-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/raalarcon9705/jira-mcp/actions/workflows/ci.yml)
+
+A complete **open source** MCP (Model Context Protocol) server for integrating Jira/Atlassian with AI applications. This server provides all main Jira dashboard functionalities through a unified API with optimized responses for token efficiency.
+
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![Contributors](https://img.shields.io/github/contributors/raalarcon9705/jira-mcp.svg)](https://github.com/raalarcon9705/jira-mcp/graphs/contributors)
+[![Stars](https://img.shields.io/github/stars/raalarcon9705/jira-mcp.svg)](https://github.com/raalarcon9705/jira-mcp/stargazers)
 
 ## Features
 
@@ -17,6 +29,34 @@ A complete MCP (Model Context Protocol) server for integrating Jira/Atlassian wi
 
 ## Installation
 
+### Option 1: Using npx (Recommended)
+
+The easiest way to use this MCP server is with `npx`:
+
+1. **Configure your MCP client** (e.g., Claude Desktop) with this configuration:
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "npx",
+      "args": ["jira-mcp-server"],
+      "env": {
+        "JIRA_HOST": "https://your-domain.atlassian.net",
+        "JIRA_EMAIL": "your-email@example.com",
+        "JIRA_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+2. **Get your Jira API token** (see instructions below)
+
+That's it! The server will be automatically downloaded and run when needed.
+
+### Option 2: Local Development
+
 1. **Clone the repository**:
 ```bash
 git clone https://github.com/raalarcon9705/jira-mcp.git
@@ -28,18 +68,30 @@ cd jira-mcp
 npm install
 ```
 
-3. **Configure environment variables**:
+3. **Build the project**:
 ```bash
-cp env.example .env
+npm run build
 ```
 
-Edit the `.env` file with your Jira credentials:
+4. **Configure your MCP client** with the full path to the built server:
 
-```env
-JIRA_HOST=your-domain.atlassian.net
-JIRA_EMAIL=your-email@example.com
-JIRA_API_TOKEN=your-api-token
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "node",
+      "args": ["/full/path/to/jira-mcp/dist/index.js"],
+      "env": {
+        "JIRA_HOST": "https://your-domain.atlassian.net",
+        "JIRA_EMAIL": "your-email@example.com",
+        "JIRA_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
 ```
+
+**Note**: Replace `/full/path/to/jira-mcp/` with the actual absolute path to your project directory.
 
 ### Getting API Token
 
@@ -49,6 +101,10 @@ JIRA_API_TOKEN=your-api-token
 4. Copy the generated token
 
 ## Usage
+
+### Using with npx (Recommended)
+
+Once configured in your MCP client, the server will automatically start when needed. No additional setup required!
 
 ### Development
 
@@ -61,6 +117,19 @@ npm run dev
 ```bash
 npm run build
 npm start
+```
+
+### Testing with npx
+
+You can also test the server directly with npx:
+
+```bash
+# Test the server
+npx jira-mcp-server
+
+# Or use with MCP Inspector
+npx @modelcontextprotocol/inspector
+# Then configure: command: "npx", args: ["jira-mcp-server"]
 ```
 
 ## Available Tools
@@ -387,7 +456,7 @@ npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/cal
       "command": "node",
       "args": ["build/index.js"],
       "env": {
-        "JIRA_HOST": "your-domain.atlassian.net",
+        "JIRA_HOST": "https://your-domain.atlassian.net",
         "JIRA_EMAIL": "your-email@example.com",
         "JIRA_API_TOKEN": "your-api-token"
       }
@@ -402,6 +471,11 @@ npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/cal
 
 **Environment Variables** (for advanced users):
 ```bash
+# Jira configuration
+export JIRA_HOST="https://your-domain.atlassian.net"
+export JIRA_EMAIL="your-email@example.com"
+export JIRA_API_TOKEN="your-api-token"
+
 # Timeout settings
 export MCP_SERVER_REQUEST_TIMEOUT=60000
 export MCP_REQUEST_TIMEOUT_RESET_ON_PROGRESS=false
@@ -660,6 +734,77 @@ When reporting bugs or requesting features:
 - **Code examples**: Look at existing implementations
 
 Thank you for contributing to the Jira MCP Server! 🚀
+
+## 🤝 Contributing
+
+We welcome contributions from the community! This project is open source and we value all contributions.
+
+### Quick Start for Contributors
+
+1. **Fork the repository** on GitHub
+2. **Clone your fork**:
+   ```bash
+   git clone https://github.com/your-username/jira-mcp.git
+   cd jira-mcp
+   ```
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+4. **Create a branch** for your feature:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+5. **Make your changes** and test them
+6. **Submit a pull request**
+
+### Ways to Contribute
+
+- 🐛 **Report bugs** using our [bug report template](.github/ISSUE_TEMPLATE/bug_report.md)
+- ✨ **Request features** using our [feature request template](.github/ISSUE_TEMPLATE/feature_request.md)
+- 💻 **Submit code** improvements and new features
+- 📚 **Improve documentation** and examples
+- 🧪 **Add tests** for better coverage
+- 🌍 **Translate** documentation to other languages
+
+### Development Guidelines
+
+- Follow our [Contributing Guide](CONTRIBUTING.md)
+- Read our [Code of Conduct](CODE_OF_CONDUCT.md)
+- Use TypeScript for all new code
+- Add tests for new functionality
+- Update documentation as needed
+
+### Getting Help
+
+- 💬 **Discussions**: Use GitHub Discussions for questions
+- 🐛 **Issues**: Use GitHub Issues for bugs and feature requests
+- 📖 **Documentation**: Check the README and CONTRIBUTING.md
+
+## Publishing to npm
+
+To publish this MCP server to npm for distribution:
+
+1. **Login to npm**:
+   ```bash
+   npm login
+   ```
+
+2. **Run the publish script**:
+   ```bash
+   ./publish.sh
+   ```
+
+3. **Or publish manually**:
+   ```bash
+   npm run build
+   npm publish
+   ```
+
+The package will be available as `jira-mcp-server` and users can install it with:
+```bash
+npx jira-mcp-server
+```
 
 ## License
 
