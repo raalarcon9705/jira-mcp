@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "jira": {
+      "command": "node",
+      "args": ["/ruta/completa/al/proyecto/dist/index.js"],
+      "env": {
+        "JIRA_HOST": "tu-dominio.atlassian.net",
+        "JIRA_EMAIL": "tu-email@ejemplo.com",
+        "JIRA_API_TOKEN": "tu-api-token"
+      }
+    }
+  }
+}
