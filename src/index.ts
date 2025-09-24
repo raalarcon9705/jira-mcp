@@ -12,6 +12,7 @@ import { createIssueTools, handleIssueTool } from './tools/issues.js';
 import { createCommentTools, handleCommentTool } from './tools/comments.js';
 import { createTransitionTools, handleTransitionTool } from './tools/transitions.js';
 import { createAssignmentTools, handleAssignmentTool } from './tools/assignments.js';
+import { createSprintTools, handleSprintTool } from './tools/sprints.js';
 
 class JiraMCPServer {
   private server: Server;
@@ -42,6 +43,7 @@ class JiraMCPServer {
       const commentTools = createCommentTools(this.jiraClient);
       const transitionTools = createTransitionTools(this.jiraClient);
       const assignmentTools = createAssignmentTools(this.jiraClient);
+      const sprintTools = createSprintTools(this.jiraClient);
 
       return {
         tools: [
@@ -50,6 +52,7 @@ class JiraMCPServer {
           ...commentTools,
           ...transitionTools,
           ...assignmentTools,
+          ...sprintTools,
         ],
       };
     });
@@ -87,6 +90,17 @@ class JiraMCPServer {
           name.startsWith('get_current_user')
         ) {
           return await handleAssignmentTool(name, args || {}, this.jiraClient);
+        } else if (
+          name.startsWith('get_sprints') ||
+          name.startsWith('move_issue_to_sprint') ||
+          name.startsWith('get_sprint_issues') ||
+          name.startsWith('get_agile_boards') ||
+          name.startsWith('delete_sprint') ||
+          name.startsWith('create_sprint') ||
+          name.startsWith('update_sprint') ||
+          name.startsWith('close_sprint')
+        ) {
+          return await handleSprintTool(name, args || {}, this.jiraClient);
         } else {
           throw new Error(`Unknown tool: ${name}`);
         }

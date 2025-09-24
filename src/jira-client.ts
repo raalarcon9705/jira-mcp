@@ -1,4 +1,4 @@
-import { Version3Client } from 'jira.js';
+import { Version3Client, AgileClient } from 'jira.js';
 import { config } from 'dotenv';
 
 // Type for Jira API errors
@@ -25,17 +25,26 @@ import type {
   GetCommentsInput,
   UpdateCommentInput,
   DeleteCommentInput,
+  GetSprintsInput,
+  MoveIssueToSprintInput,
+  GetSprintIssuesInput,
+  DeleteSprintInput,
+  CreateSprintInput,
+  UpdateSprintInput,
+  CloseSprintInput,
 } from './schemas/index.js';
 import { AddComment } from 'jira.js/dist/esm/types/version3/parameters/addComment.js';
 import { UpdateComment } from 'jira.js/dist/esm/types/version3/parameters/updateComment.js';
 import { CreateIssue } from 'jira.js/dist/esm/types/version3/parameters/createIssue.js';
 import { IssueUpdateDetails } from 'jira.js/dist/esm/types/version3/models/issueUpdateDetails.js';
+import { PartiallyUpdateSprint } from 'jira.js/dist/esm/types/agile/parameters/partiallyUpdateSprint.js';
 
 // Load environment variables
 config();
 
 export class JiraClient {
   private jira: Version3Client;
+  private agileClient: AgileClient;
 
   constructor() {
     const host = process.env.JIRA_HOST;
@@ -47,6 +56,16 @@ export class JiraClient {
     }
 
     this.jira = new Version3Client({
+      host,
+      authentication: {
+        basic: {
+          email,
+          apiToken,
+        },
+      },
+    });
+
+    this.agileClient = new AgileClient({
       host,
       authentication: {
         basic: {
@@ -443,6 +462,120 @@ export class JiraClient {
       return response;
     } catch (error) {
       throw new Error(`Failed to get current user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Get agile boards
+  async getAgileBoards(args: Record<string, unknown>) {
+    try {
+      const response = await this.agileClient.board.getAllBoards({
+        projectKeyOrId: args.projectKey as string,
+        type: args.boardType as 'scrum' | 'kanban',
+      });
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to get agile boards: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Get sprints for a board
+  async getSprints(input: GetSprintsInput) {
+    try {
+      const response = await this.agileClient.board.getAllSprints({
+        boardId: input.boardId,
+        state: input.state as 'active' | 'closed' | 'future',
+      });
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to get sprints: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Move issue to sprint
+  async moveIssueToSprint(input: MoveIssueToSprintInput) {
+    try {
+      const response = await this.agileClient.sprint.moveIssuesToSprintAndRank({
+        sprintId: input.sprintId,
+        issues: [input.issueKey],
+      });
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to move issue to sprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Get issues in a sprint
+  async getSprintIssues(input: GetSprintIssuesInput) {
+    try {
+      const response = await this.agileClient.sprint.getIssuesForSprint({
+        sprintId: input.sprintId,
+        maxResults: input.maxResults,
+      });
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to get sprint issues: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Delete a sprint
+  async deleteSprint(input: DeleteSprintInput) {
+    try {
+      const response = await this.agileClient.sprint.deleteSprint({
+        sprintId: input.sprintId,
+      });
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to delete sprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Create a sprint
+  async createSprint(input: CreateSprintInput) {
+    try {
+      const response = await this.agileClient.sprint.createSprint({
+        name: input.name,
+        originBoardId: input.originBoardId,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        goal: input.goal,
+      });
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to create sprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Update a sprint
+  async updateSprint(input: UpdateSprintInput) {
+    try {
+      const updateData: PartiallyUpdateSprint = { sprintId: input.sprintId };
+
+      // Only include fields that are provided
+      if (input.name !== undefined) updateData.name = input.name;
+      if (input.startDate !== undefined) updateData.startDate = input.startDate;
+      if (input.endDate !== undefined) updateData.endDate = input.endDate;
+      if (input.goal !== undefined) updateData.goal = input.goal;
+      if (input.state !== undefined) updateData.state = input.state;
+
+      const response = await this.agileClient.sprint.partiallyUpdateSprint(updateData);
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to update sprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Close a sprint
+  async closeSprint(input: CloseSprintInput) {
+    try {
+      const updateData: PartiallyUpdateSprint = {
+        sprintId: input.sprintId,
+        state: 'closed'
+      };
+
+      const response = await this.agileClient.sprint.partiallyUpdateSprint(updateData);
+      return response;
+    } catch (error) {
+      throw new Error(`Failed to close sprint: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

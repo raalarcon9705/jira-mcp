@@ -191,6 +191,53 @@ export const deleteCommentSchema = yup.object({
   commentId: yup.string().required('Comment ID is required'),
 });
 
+// Schema for getting sprints
+export const getSprintsSchema = yup.object({
+  boardId: yup.number().required('Board ID is required'),
+  state: yup.string().oneOf(['active', 'closed', 'future']).optional(),
+});
+
+// Schema for moving issue to sprint
+export const moveIssueToSprintSchema = yup.object({
+  issueKey: yup.string().required('Issue key is required'),
+  sprintId: yup.number().required('Sprint ID is required'),
+});
+
+// Schema for getting sprint issues
+export const getSprintIssuesSchema = yup.object({
+  sprintId: yup.number().required('Sprint ID is required'),
+  maxResults: yup.number().min(1).max(100).default(50),
+});
+
+// Schema for deleting a sprint
+export const deleteSprintSchema = yup.object({
+  sprintId: yup.number().required('Sprint ID is required'),
+});
+
+// Schema for creating a sprint
+export const createSprintSchema = yup.object({
+  name: yup.string().required('Sprint name is required'),
+  originBoardId: yup.number().required('Origin board ID is required'),
+  startDate: yup.string().optional(),
+  endDate: yup.string().optional(),
+  goal: yup.string().optional(),
+});
+
+// Schema for updating a sprint
+export const updateSprintSchema = yup.object({
+  sprintId: yup.number().required('Sprint ID is required'),
+  name: yup.string().optional(),
+  startDate: yup.string().optional(),
+  endDate: yup.string().optional(),
+  goal: yup.string().optional(),
+  state: yup.string().oneOf(['future', 'active', 'closed']).optional(),
+});
+
+// Schema for closing a sprint
+export const closeSprintSchema = yup.object({
+  sprintId: yup.number().required('Sprint ID is required'),
+});
+
 // TypeScript types derived from schemas
 export type CreateIssueInput = yup.InferType<typeof createIssueSchema>;
 export type UpdateIssueInput = yup.InferType<typeof updateIssueSchema>;
@@ -206,3 +253,10 @@ export type DeleteIssueInput = yup.InferType<typeof deleteIssueSchema>;
 export type GetCommentsInput = yup.InferType<typeof getCommentsSchema>;
 export type UpdateCommentInput = yup.InferType<typeof updateCommentSchema>;
 export type DeleteCommentInput = yup.InferType<typeof deleteCommentSchema>;
+export type GetSprintsInput = yup.InferType<typeof getSprintsSchema>;
+export type MoveIssueToSprintInput = yup.InferType<typeof moveIssueToSprintSchema>;
+export type GetSprintIssuesInput = yup.InferType<typeof getSprintIssuesSchema>;
+export type DeleteSprintInput = yup.InferType<typeof deleteSprintSchema>;
+export type CreateSprintInput = yup.InferType<typeof createSprintSchema>;
+export type UpdateSprintInput = yup.InferType<typeof updateSprintSchema>;
+export type CloseSprintInput = yup.InferType<typeof closeSprintSchema>;
