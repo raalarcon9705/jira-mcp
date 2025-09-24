@@ -125,7 +125,7 @@ You can also test the server directly with npx:
 
 ```bash
 # Test the server
-npx @raalarcon9705/jira-mcp-server
+npx raalarcon-jira-mcp-server
 
 # Or use with MCP Inspector
 npx @modelcontextprotocol/inspector
@@ -803,7 +803,7 @@ To publish this MCP server to npm for distribution:
 
 The package will be available as `jira-mcp-server` and users can install it with:
 ```bash
-npx @raalarcon9705/jira-mcp-server
+npx raalarcon-jira-mcp-server
 ```
 
 ## License

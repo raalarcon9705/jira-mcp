@@ -1,5 +1,5 @@
 {
-  "name": "@raalarcon9705/jira-mcp-server",
+  "name": "raalarcon-jira-mcp-server",
   "version": "1.0.0",
   "main": "dist/index.js",
   "bin": {
@@ -21,7 +21,7 @@
     "url": "https://github.com/raalarcon9705"
   },
   "license": "MIT",
-  "description": "Open source MCP Server for Jira/Atlassian integration - Install with npx @raalarcon9705/jira-mcp-server",
+  "description": "Open source MCP Server for Jira/Atlassian integration - Install with npx raalarcon-jira-mcp-server",
   "keywords": [
     "mcp",
     "jira",
