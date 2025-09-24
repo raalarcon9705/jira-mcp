@@ -22,6 +22,7 @@ A complete **open source** MCP (Model Context Protocol) server for integrating J
 - ✅ **Transitions**: Move issues between states
 - ✅ **Assignments**: Assign issues to users
 - ✅ **User Management**: Search and manage users
+- ✅ **Sprint Management**: Complete agile sprint lifecycle management
 - ✅ **Validation**: Yup schema validation
 - ✅ **Authentication**: Full Jira Cloud support
 - ✅ **Optimized Responses**: Token-efficient field filtering
@@ -367,6 +368,127 @@ Gets information about the current authenticated user.
 }
 ```
 
+### Sprint Management
+
+#### `get_agile_boards`
+Gets all agile boards available in the Jira instance. Required to find board IDs for sprint operations.
+
+**Parameters**:
+- `projectKey` (optional): Filter boards by project
+- `boardType` (optional): Filter by type (scrum, kanban)
+
+**Response**: Array of boards with essential fields:
+```json
+[
+  {
+    "id": 191,
+    "name": "DreamStar Board",
+    "type": "scrum",
+    "projectKey": "DRMSTR",
+    "projectName": "DreamStar"
+  }
+]
+```
+
+#### `get_sprints`
+Gets all sprints for a specific board. Returns sprint information including ID, name, state, and dates.
+
+**Parameters**:
+- `boardId` (required): The ID of the board to get sprints from
+- `state` (optional): Filter sprints by state (active, closed, future)
+
+**Response**: Array of sprints with essential fields:
+```json
+[
+  {
+    "id": 387,
+    "name": "DRMSTR Sprint 1",
+    "state": "active",
+    "startDate": "2025-09-15T14:05:37.511Z",
+    "endDate": "2025-09-26T05:00:00.000Z",
+    "goal": ""
+  }
+]
+```
+
+#### `create_sprint`
+Creates a new sprint. Sprint name and origin board ID are required. Start date, end date, and goal are optional.
+
+**Parameters**:
+- `name` (required): Name of the sprint to create
+- `originBoardId` (required): ID of the board where the sprint will be created
+- `startDate` (optional): Start date of the sprint (ISO 8601 format)
+- `endDate` (optional): End date of the sprint (ISO 8601 format)
+- `goal` (optional): Goal or objective of the sprint
+
+**Response**: Created sprint with essential fields:
+```json
+{
+  "id": 421,
+  "name": "DRMSTR Sprint 3",
+  "state": "future",
+  "goal": ""
+}
+```
+
+#### `update_sprint`
+Updates sprint information (name, dates, goal, state). Only provided fields will be updated. For closed sprints, only name and goal can be updated.
+
+**Parameters**:
+- `sprintId` (required): ID of the sprint to update
+- `name` (optional): New name for the sprint
+- `startDate` (optional): New start date (ISO 8601 format)
+- `endDate` (optional): New end date (ISO 8601 format)
+- `goal` (optional): New goal or objective for the sprint
+- `state` (optional): New state (future, active, closed)
+
+**Response**: `Sprint 421 updated successfully`
+
+#### `close_sprint`
+Closes and completes a sprint. This action requires the sprint to be in the "active" state. Once closed, the sprint cannot be reopened.
+
+**Parameters**:
+- `sprintId` (required): ID of the sprint to close
+
+**Response**: `Sprint 421 closed successfully`
+
+#### `delete_sprint`
+Deletes a sprint. Once deleted, all open issues in the sprint will be moved to the backlog. This action is irreversible.
+
+**Parameters**:
+- `sprintId` (required): ID of the sprint to delete
+
+**Response**: `Sprint 421 deleted successfully. All open issues moved to backlog.`
+
+#### `move_issue_to_sprint`
+Moves an issue to a specific sprint. Returns a confirmation message. Issues can only be moved to open or active sprints.
+
+**Parameters**:
+- `issueKey` (required): Key of the issue to move (e.g., "PROJ-123")
+- `sprintId` (required): ID of the sprint to move the issue to
+
+**Response**: `Issue PROJ-123 moved to sprint 421 successfully`
+
+#### `get_sprint_issues`
+Gets all issues for a given sprint. Returns a list of essential issue details (key, summary, status, assignee, priority).
+
+**Parameters**:
+- `sprintId` (required): ID of the sprint
+- `maxResults` (optional): Maximum number of issues to return (1-100, default: 50)
+
+**Response**: Array of issues with essential fields:
+```json
+[
+  {
+    "key": "DRMSTR-1",
+    "summary": "Implement user authentication",
+    "status": "In Progress",
+    "assignee": "John Doe",
+    "priority": "High"
+  }
+]
+```
+
 ## Response Optimization
 
 The server is optimized for token efficiency:
@@ -402,7 +524,8 @@ src/
     ├── issues.ts         # Issue tools
     ├── comments.ts       # Comment tools
     ├── transitions.ts    # Transition tools
-    └── assignments.ts    # Assignment tools
+    ├── assignments.ts    # Assignment tools
+    └── sprints.ts        # Sprint management tools
 ```
 
 ### Adding New Features
