@@ -1,5 +1,6 @@
 import * as yup from 'yup';
 import { AddComment } from 'jira.js/dist/esm/types/version3/parameters/addComment.js';
+import { markdownToADF, isMarkdown } from '../utils/markdown-to-adf.js';
 
 // ADF (Atlassian Document Format) type
 export type ADFDocument = AddComment['comment'];
@@ -8,7 +9,15 @@ export type ADFDocument = AddComment['comment'];
 export const createIssueSchema = yup.object({
   projectKey: yup.string().required('Project key is required'),
   summary: yup.string().required('Summary is required').max(255, 'Summary too long'),
-  description: yup.string().optional(),
+  description: yup.mixed()
+    .optional()
+    .transform(function (value) {
+      // If it's a string and looks like markdown, convert to ADF
+      if (typeof value === 'string' && isMarkdown(value)) {
+        return markdownToADF(value);
+      }
+      return value;
+    }),
   issueType: yup.string().required('Issue type is required'),
   priority: yup.string().optional(),
   assignee: yup.string().optional(),
@@ -22,7 +31,15 @@ export const createIssueSchema = yup.object({
 export const updateIssueSchema = yup.object({
   issueKey: yup.string().required('Issue key is required'),
   summary: yup.string().optional().max(255, 'Summary too long'),
-  description: yup.string().optional(),
+  description: yup.mixed()
+    .optional()
+    .transform(function (value) {
+      // If it's a string and looks like markdown, convert to ADF
+      if (typeof value === 'string' && isMarkdown(value)) {
+        return markdownToADF(value);
+      }
+      return value;
+    }),
   priority: yup.string().optional(),
   assignee: yup.string().optional(),
   labels: yup.array().of(yup.string()).optional(),
@@ -36,39 +53,30 @@ export const createCommentSchema = yup.object({
   issueKey: yup.string().required('Issue key is required'),
   body: yup.mixed()
     .required('Comment body is required')
-    .test('is-valid-body', 'Body must be a string or valid ADF JSON', function (value) {
-      // If it's a string, check if it's valid JSON
-      if (typeof value === 'string') {
-        // If it's a simple string (not JSON), it's fine
-        if (!value.trim().startsWith('{')) {
-          return true;
-        }
-        // If it looks like JSON, try to parse it
-        try {
-          const parsed = JSON.parse(value);
-          // Verify it has the basic ADF structure
-          return parsed && typeof parsed === 'object' && parsed.type === 'doc' && parsed.version === 1;
-        } catch {
-          return false;
-        }
-      }
-      // If it's an object, verify ADF structure
-      if (typeof value === 'object' && value !== null) {
-        const adfValue = value as ADFDocument;
-        return adfValue && typeof adfValue === 'object' && adfValue.type === 'doc' && adfValue.version === 1;
-      }
-      return false;
+    .test('is-string', 'Body must be a string', function (value) {
+      return typeof value === 'string';
     })
     .transform(function (value) {
-      // If it's a string that looks like JSON, parse it
-      if (typeof value === 'string' && value.trim().startsWith('{')) {
-        try {
-          return JSON.parse(value);
-        } catch {
-          return value; // If parsing fails, return the original string
-        }
+      // If it's a string and looks like markdown, convert to ADF
+      if (typeof value === 'string' && isMarkdown(value)) {
+        return markdownToADF(value);
       }
-      return value;
+      // For plain text, create a simple ADF paragraph
+      return {
+        version: 1,
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: value
+              }
+            ]
+          }
+        ]
+      };
     }),
   visibility: yup.object({
     type: yup.string().oneOf(['role', 'group']).optional(),
@@ -145,39 +153,30 @@ export const updateCommentSchema = yup.object({
   commentId: yup.string().required('Comment ID is required'),
   body: yup.mixed()
     .required('Comment body is required')
-    .test('is-valid-body', 'Body must be a string or valid ADF JSON', function (value) {
-      // If it's a string, check if it's valid JSON
-      if (typeof value === 'string') {
-        // If it's a simple string (not JSON), it's fine
-        if (!value.trim().startsWith('{')) {
-          return true;
-        }
-        // If it looks like JSON, try to parse it
-        try {
-          const parsed = JSON.parse(value);
-          // Verify it has the basic ADF structure
-          return parsed && typeof parsed === 'object' && parsed.type === 'doc' && parsed.version === 1;
-        } catch {
-          return false;
-        }
-      }
-      // If it's an object, verify ADF structure
-      if (typeof value === 'object' && value !== null) {
-        const adfValue = value as ADFDocument;
-        return adfValue && typeof adfValue === 'object' && adfValue.type === 'doc' && adfValue.version === 1;
-      }
-      return false;
+    .test('is-string', 'Body must be a string', function (value) {
+      return typeof value === 'string';
     })
     .transform(function (value) {
-      // If it's a string that looks like JSON, parse it
-      if (typeof value === 'string' && value.trim().startsWith('{')) {
-        try {
-          return JSON.parse(value);
-        } catch {
-          return value; // If parsing fails, return the original string
-        }
+      // If it's a string and looks like markdown, convert to ADF
+      if (typeof value === 'string' && isMarkdown(value)) {
+        return markdownToADF(value);
       }
-      return value;
+      // For plain text, create a simple ADF paragraph
+      return {
+        version: 1,
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: value
+              }
+            ]
+          }
+        ]
+      };
     }),
   visibility: yup.object({
     type: yup.string().oneOf(['role', 'group']).optional(),

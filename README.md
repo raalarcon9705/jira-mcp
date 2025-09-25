@@ -23,6 +23,7 @@ A complete **open source** MCP (Model Context Protocol) server for integrating J
 - ✅ **Assignments**: Assign issues to users
 - ✅ **User Management**: Search and manage users
 - ✅ **Sprint Management**: Complete agile sprint lifecycle management
+- ✅ **Rich Text Support**: Markdown to ADF conversion for formatted descriptions and comments
 - ✅ **Validation**: Yup schema validation
 - ✅ **Authentication**: Full Jira Cloud support
 - ✅ **Optimized Responses**: Token-efficient field filtering
@@ -106,6 +107,62 @@ npm run build
 ### Using with npx (Recommended)
 
 Once configured in your MCP client, the server will automatically start when needed. No additional setup required!
+
+### Rich Text Support with Markdown
+
+The server now supports **automatic Markdown to ADF conversion** for issue descriptions and comments. Simply use Markdown syntax and it will be automatically converted to Atlassian Document Format (ADF).
+
+#### Supported Markdown Elements
+
+- **Headers**: `# H1`, `## H2`, `### H3`
+- **Text formatting**: `**bold**`, `*italic*`
+- **Code**: `` `inline code` `` and ```code blocks```
+- **Lists**: `- bullet lists` and `1. numbered lists`
+- **Links**: `[text](url)`
+- **Blockquotes**: `> quoted text`
+- **Checkboxes**: `- [x] completed task`
+
+#### Example Usage
+
+```javascript
+// Create issue with Markdown description
+create_issue({
+  projectKey: "PROJ",
+  summary: "Bug Report",
+  description: `# Bug Report
+
+## Description
+This is a **critical** bug affecting the login system.
+
+## Steps to Reproduce
+1. Go to login page
+2. Enter invalid credentials
+3. Click login button
+
+## Code Example
+\`\`\`javascript
+function login(username, password) {
+  return authenticate(username, password);
+}
+\`\`\`
+
+> **Note**: This bug was reported by multiple users.`
+});
+
+// Create comment with Markdown
+create_comment({
+  issueKey: "PROJ-123",
+  body: `## Update
+
+**Status**: Fixed ✅
+
+- [x] Identified root cause
+- [x] Implemented fix
+- [x] Tested solution
+
+The issue has been resolved.`
+});
+```
 
 ### Development
 

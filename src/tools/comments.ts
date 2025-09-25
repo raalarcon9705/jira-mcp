@@ -12,7 +12,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'create_comment',
-      description: 'Add a comment to a Jira issue. Supports plain text or rich Atlassian Document Format (ADF) for formatting. Returns comment ID and creation details.',
+      description: 'Add a comment to a Jira issue. Supports plain text or Markdown for rich formatting. Markdown is automatically converted to ADF. Returns comment ID and creation details.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -22,7 +22,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
           },
           body: {
             type: 'string',
-            description: 'Comment content. Can be plain text or ADF JSON for rich formatting (headings, lists, code blocks, links, etc.).',
+            description: 'Comment content. Can be plain text or Markdown for rich formatting (headings, lists, code blocks, links, etc.). Markdown will be automatically converted to ADF.',
           },
           visibility: {
             type: 'object',
@@ -69,7 +69,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
     },
     {
       name: 'update_comment',
-      description: 'Update an existing comment on a Jira issue',
+      description: 'Update an existing comment on a Jira issue. Supports plain text or Markdown for rich formatting. Markdown is automatically converted to ADF.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -83,7 +83,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
           },
           body: {
             type: 'string',
-            description: 'The new comment text (supports Jira markup)',
+            description: 'The new comment text. Supports plain text or Markdown for rich formatting. Markdown will be automatically converted to ADF.',
           },
           visibility: {
             type: 'object',
@@ -132,7 +132,7 @@ export async function handleCommentTool(
 ) {
   switch (name) {
     case 'create_comment': {
-      const validatedArgs = await createCommentSchema.validate(args);
+      const validatedArgs = createCommentSchema.cast(args);
       const comment = await jiraClient.createComment(validatedArgs);
       return {
         content: [
@@ -174,7 +174,7 @@ export async function handleCommentTool(
     }
 
     case 'update_comment': {
-      const validatedArgs = await updateCommentSchema.validate(args);
+      const validatedArgs = updateCommentSchema.cast(args);
       const result = await jiraClient.updateComment(validatedArgs);
       return {
         content: [
