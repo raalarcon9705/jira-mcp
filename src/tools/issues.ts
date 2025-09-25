@@ -26,7 +26,7 @@ export function createIssueTools(_jiraClient: JiraClient): Tool[] {
           },
           description: {
             type: 'string',
-            description: 'Detailed issue description. Supports plain text, Markdown, or Atlassian Document Format (ADF) for rich formatting. Markdown will be automatically converted to ADF.',
+            description: 'Detailed issue description. Supports plain text, Markdown, or Atlassian Document Format (ADF) for rich formatting. Markdown will be automatically converted to ADF. For mentions, use format: @[accountId:displayName] (get accountId from get_users tool).',
           },
           issueType: {
             type: 'string',
@@ -102,7 +102,7 @@ export function createIssueTools(_jiraClient: JiraClient): Tool[] {
           },
           description: {
             type: 'string',
-            description: 'New issue description. Replaces the existing description. Supports plain text, Markdown, or ADF. Markdown will be automatically converted to ADF.',
+            description: 'New issue description. Replaces the existing description. Supports plain text, Markdown, or ADF. Markdown will be automatically converted to ADF. For mentions, use format: @[accountId:displayName] (get accountId from get_users tool).',
           },
           priority: {
             type: 'string',

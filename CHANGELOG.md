@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-09-25
+
+### Added
+- **Mention Support**: Full support for user mentions in comments and issue descriptions
+  - New mention syntax: `@[accountId:displayName]` for precise user targeting
+  - Automatic conversion of mentions to ADF mention nodes with proper notifications
+  - Integration with `get_users` tool to obtain account IDs
+  - Support for mentions in all Markdown contexts (headings, paragraphs, lists, blockquotes)
+  - Smart mention processing that preserves formatting and ignores mentions in code blocks
+- **Enhanced Markdown Processing**: Improved Markdown to ADF conversion with mention support
+  - Recursive ADF node processing for mentions after initial Markdown conversion
+  - Proper handling of nested formatting (bold + italic + strikethrough combinations)
+  - Code block and inline code protection (mentions remain as plain text)
+  - Support for complex formatting combinations with mentions
+- **Comprehensive Testing**: Jest test suite for mention functionality
+  - Test cases for mention detection and processing
+  - Tests for mentions in different contexts (normal text, code blocks, inline code)
+  - Combined formatting tests with mentions
+  - TypeScript interfaces for better test type safety
+
+### Changed
+- **Tool Descriptions**: Updated all tool descriptions to include mention format information
+  - `create_issue`, `update_issue`: Added mention format guidance in description field
+  - `create_comment`, `update_comment`: Enhanced descriptions with mention syntax and examples
+  - Clear instructions on using `get_users` tool to obtain account IDs
+  - Generic descriptions without personal data for better reusability
+- **Comment API Enhancement**: Enhanced comment retrieval with full ADF content
+  - `get_comments` now returns complete ADF body alongside extracted text
+  - Better field naming for improved readability
+  - Full ADF structure preservation for rich content display
+
+### Fixed
+- **Markdown Parser**: Fixed nested formatting issues in Markdown to ADF conversion
+  - Proper handling of combined formatting (bold + italic + strikethrough)
+  - Recursive processing of nested tokens in Markdown parser
+  - Correct application of multiple marks to text nodes
+- **Mention Processing**: Fixed mention conversion in various contexts
+  - Mentions in code blocks and inline code are correctly ignored
+  - Mentions in normal text are properly converted to ADF mention nodes
+  - Consistent mention processing across all ADF node types
+
 ## [1.0.3] - 2025-09-24
 
 ### Added

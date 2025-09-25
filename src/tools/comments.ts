@@ -12,7 +12,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'create_comment',
-      description: 'Add a comment to a Jira issue. Supports plain text or Markdown for rich formatting. Markdown is automatically converted to ADF. Returns comment ID and creation details.',
+      description: 'Add a comment to a Jira issue. Supports plain text or Markdown for rich formatting (headings, lists, code blocks, links, etc.). Markdown is automatically converted to ADF. For mentions, use format: @[accountId:displayName] (get accountId from get_users tool). Returns comment ID and creation details.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -22,7 +22,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
           },
           body: {
             type: 'string',
-            description: 'Comment content. Can be plain text or Markdown for rich formatting (headings, lists, code blocks, links, etc.). Markdown will be automatically converted to ADF.',
+            description: 'Comment content. Can be plain text or Markdown for rich formatting (headings, lists, code blocks, links, etc.). Markdown will be automatically converted to ADF. For mentions, use format: @[accountId:displayName] (get accountId from get_users tool).',
           },
           visibility: {
             type: 'object',
@@ -69,7 +69,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
     },
     {
       name: 'update_comment',
-      description: 'Update an existing comment on a Jira issue. Supports plain text or Markdown for rich formatting. Markdown is automatically converted to ADF.',
+      description: 'Update an existing comment on a Jira issue. Supports plain text or Markdown for rich formatting (headings, lists, code blocks, links, etc.). Markdown is automatically converted to ADF. For mentions, use format: @[accountId:displayName] (get accountId from get_users tool).',
       inputSchema: {
         type: 'object',
         properties: {
@@ -83,7 +83,7 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
           },
           body: {
             type: 'string',
-            description: 'The new comment text. Supports plain text or Markdown for rich formatting. Markdown will be automatically converted to ADF.',
+            description: 'The new comment text. Supports plain text or Markdown for rich formatting (headings, lists, code blocks, links, etc.). Markdown will be automatically converted to ADF. For mentions, use format: @[accountId:displayName] (get accountId from get_users tool).',
           },
           visibility: {
             type: 'object',
@@ -159,7 +159,8 @@ export async function handleCommentTool(
           author: comment.author?.displayName, // Shorter field name
           authorId: comment.author?.accountId, // Shorter field name
           created: comment.created,
-          text: comment.body?.content?.[0]?.content?.[0]?.text || '' // Extract text content
+          body: comment.body, // Return full body content (ADF format)
+          text: comment.body?.content?.[0]?.content?.[0]?.text || '' // Extract text content for backward compatibility
         })) || []
       };
 

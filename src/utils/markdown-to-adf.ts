@@ -55,17 +55,20 @@ export class MarkdownToADFConverter {
     }
 
     try {
-      // Parse markdown into tokens
+      // Parse markdown into tokens first
       const tokens = marked.lexer(markdown) as GenericToken[];
 
-      // Convert tokens to ADF nodes
+      // Convert tokens to ADF nodes without processing mentions
       const content = this.convertTokens(tokens);
 
-      return {
+      const adfDocument = {
         version: 1,
         type: 'doc',
         content: content
       };
+
+      // Process mentions in the ADF document after conversion
+      return this.processMentionsInADF(adfDocument);
     } catch (error) {
       console.error('Error converting markdown to ADF:', error);
       // Fallback to plain text paragraph
@@ -85,6 +88,71 @@ export class MarkdownToADFConverter {
         ]
       };
     }
+  }
+
+  /**
+   * Extracts mention information from markdown text, excluding those in code blocks
+   * @param text - The text to extract mentions from
+   * @returns Array of mention objects
+   */
+  private extractMentionsExcludingCodeBlocks(text: string): Array<{ raw: string; id: string; name: string }> {
+    const mentionPattern = /@\[([a-f0-9-]+):([^\]]+)\]/g;
+    const codeBlockPattern = /```[\s\S]*?```|`[^`\n]+`/g;
+    const mentions: Array<{ raw: string; id: string; name: string }> = [];
+
+    // Find all code blocks and inline code
+    const codeBlocks: Array<{ start: number; end: number }> = [];
+    let codeMatch;
+
+    while ((codeMatch = codeBlockPattern.exec(text)) !== null) {
+      codeBlocks.push({
+        start: codeMatch.index,
+        end: codeMatch.index + codeMatch[0].length
+      });
+    }
+
+    // Find mentions that are not inside code blocks
+    let mentionMatch;
+    while ((mentionMatch = mentionPattern.exec(text)) !== null) {
+      const mentionStart = mentionMatch.index;
+      const mentionEnd = mentionMatch.index + mentionMatch[0].length;
+
+      // Check if this mention is inside any code block
+      const isInCodeBlock = codeBlocks.some(block =>
+        mentionStart >= block.start && mentionEnd <= block.end
+      );
+
+      if (!isInCodeBlock) {
+        mentions.push({
+          raw: mentionMatch[0],
+          id: mentionMatch[1],
+          name: mentionMatch[2]
+        });
+      }
+    }
+
+    return mentions;
+  }
+
+  /**
+   * Extracts mention information from markdown text
+   * @param text - The text to extract mentions from
+   * @returns Array of mention objects
+   */
+  private extractMentions(text: string): Array<{ raw: string; id: string; name: string }> {
+    const mentionRegex = /@\[([^:]+):([^\]]+)\]/g;
+    const mentions: Array<{ raw: string; id: string; name: string }> = [];
+    let match;
+
+    while ((match = mentionRegex.exec(text)) !== null) {
+      mentions.push({
+        raw: match[0],
+        id: match[1],
+        name: match[2]
+      });
+    }
+
+    return mentions;
   }
 
   /**
@@ -144,10 +212,8 @@ export class MarkdownToADFConverter {
     if (token.tokens && token.tokens.length > 0) {
       // Process inline tokens
       for (const inlineToken of token.tokens) {
-        const inlineNode = this.convertInlineToken(inlineToken);
-        if (inlineNode) {
-          content.push(inlineNode);
-        }
+        const inlineNodes = this.convertInlineToken(inlineToken);
+        content.push(...inlineNodes);
       }
     } else if (token.text) {
       // Simple text paragraph
@@ -164,6 +230,78 @@ export class MarkdownToADFConverter {
   }
 
   /**
+   * Processes text that may contain mention placeholders
+   * @param text - Text with mention placeholders
+   * @param mentions - Array of mention objects
+   * @returns Array of ADF nodes (text and mention nodes)
+   */
+  private processTextWithMentions(text: string, mentions?: Array<{ raw: string; id: string; name: string }>): ADFNode[] {
+    if (!mentions || mentions.length === 0) {
+      return [{
+        type: 'text',
+        text: text
+      }];
+    }
+
+    const nodes: ADFNode[] = [];
+    let currentText = text;
+
+    // Sort placeholders by their position in the text (descending order to avoid index shifts)
+    const placeholderMatches: Array<{ index: number; placeholder: string; mention: { raw: string; id: string; name: string } }> = [];
+
+    mentions.forEach((mention, index) => {
+      const placeholder = `MENTIONPLACEHOLDER${index}MENTIONPLACEHOLDER`;
+      const placeholderIndex = currentText.indexOf(placeholder);
+      if (placeholderIndex !== -1) {
+        placeholderMatches.push({
+          index: placeholderIndex,
+          placeholder,
+          mention
+        });
+      }
+    });
+
+    // Sort by index (ascending order)
+    placeholderMatches.sort((a, b) => a.index - b.index);
+
+    let lastIndex = 0;
+    for (const match of placeholderMatches) {
+      // Add text before mention
+      if (match.index > lastIndex) {
+        nodes.push({
+          type: 'text',
+          text: currentText.substring(lastIndex, match.index)
+        });
+      }
+
+      // Add mention node
+      nodes.push({
+        type: 'mention',
+        attrs: {
+          id: match.mention.id,
+          text: `@${match.mention.name}`,
+          userType: 'APP'
+        }
+      });
+
+      lastIndex = match.index + match.placeholder.length;
+    }
+
+    // Add any remaining text
+    if (lastIndex < currentText.length) {
+      nodes.push({
+        type: 'text',
+        text: currentText.substring(lastIndex)
+      });
+    }
+
+    return nodes.length > 0 ? nodes : [{
+      type: 'text',
+      text: text
+    }];
+  }
+
+  /**
    * Converts a heading token to ADF heading node
    */
   private convertHeading(token: GenericToken): ADFNode {
@@ -171,10 +309,8 @@ export class MarkdownToADFConverter {
 
     if (token.tokens && token.tokens.length > 0) {
       for (const inlineToken of token.tokens) {
-        const inlineNode = this.convertInlineToken(inlineToken);
-        if (inlineNode) {
-          content.push(inlineNode);
-        }
+        const inlineNodes = this.convertInlineToken(inlineToken);
+        content.push(...inlineNodes);
       }
     } else if (token.text) {
       content.push({
@@ -257,6 +393,7 @@ export class MarkdownToADFConverter {
 
   /**
    * Converts a code token to ADF codeBlock node
+   * Note: Mentions in code blocks are not processed and remain as plain text
    */
   private convertCodeBlock(token: GenericToken): ADFNode {
     return {
@@ -341,35 +478,56 @@ export class MarkdownToADFConverter {
   /**
    * Converts inline tokens (text, strong, em, link, etc.) to ADF nodes
    */
-  private convertInlineToken(token: GenericToken): ADFNode | null {
+  private convertInlineToken(token: GenericToken): ADFNode[] {
+    const text = token.text || '';
+
+    // Handle nested tokens
+    if (token.tokens && token.tokens.length > 0) {
+      const nodes: ADFNode[] = [];
+      for (const childToken of token.tokens) {
+        const childNodes = this.convertInlineToken(childToken);
+        nodes.push(...childNodes);
+      }
+
+      // Apply formatting to all text nodes
+      return nodes.map(node => {
+        if (node.type === 'text') {
+          return this.applyFormatting(node, token.type);
+        }
+        return node;
+      });
+    }
+
+    // Apply formatting to text nodes
     switch (token.type) {
       case 'text':
-        return {
+        return [{
           type: 'text',
-          text: token.text || ''
-        };
+          text: text
+        }];
       case 'strong':
-        return {
+        return [{
           type: 'text',
-          text: token.text || '',
+          text: text,
           marks: [{ type: 'strong' }]
-        };
+        }];
       case 'em':
-        return {
+        return [{
           type: 'text',
-          text: token.text || '',
+          text: text,
           marks: [{ type: 'em' }]
-        };
+        }];
       case 'codespan':
-        return {
+        // For code spans, don't process mentions - keep as plain text
+        return [{
           type: 'text',
-          text: token.text || '',
+          text: text,
           marks: [{ type: 'code' }]
-        };
+        }];
       case 'link':
-        return {
+        return [{
           type: 'text',
-          text: token.text || '',
+          text: text,
           marks: [{
             type: 'link',
             attrs: {
@@ -377,23 +535,166 @@ export class MarkdownToADFConverter {
               title: token.title || ''
             }
           }]
-        };
+        }];
       case 'del':
-        return {
+        return [{
           type: 'text',
-          text: token.text || '',
+          text: text,
           marks: [{ type: 'strike' }]
-        };
+        }];
       default:
-        // For unknown inline tokens, return as plain text
-        if (token.text) {
-          return {
-            type: 'text',
-            text: token.text
-          };
-        }
-        return null;
+        return [{
+          type: 'text',
+          text: text
+        }];
     }
+  }
+
+  /**
+   * Applies formatting to a text node
+   */
+  private applyFormatting(node: ADFNode, formatType: string): ADFNode {
+    if (node.type !== 'text') {
+      return node;
+    }
+
+    const existingMarks = node.marks || [];
+    let newMark;
+
+    switch (formatType) {
+      case 'strong':
+        newMark = { type: 'strong' };
+        break;
+      case 'em':
+        newMark = { type: 'em' };
+        break;
+      case 'del':
+        newMark = { type: 'strike' };
+        break;
+      default:
+        return node;
+    }
+
+    return {
+      ...node,
+      marks: [...existingMarks, newMark]
+    };
+  }
+
+  /**
+   * Processes mentions in ADF document after conversion
+   */
+  private processMentionsInADF(adfDocument: ADFDocument): ADFDocument {
+    if (typeof adfDocument === 'string') {
+      return adfDocument;
+    }
+
+    return {
+      version: 1,
+      type: 'doc',
+      content: this.processMentionsInNodes(adfDocument?.content || [])
+    };
+  }
+
+  /**
+   * Processes mentions in an array of ADF nodes
+   */
+  private processMentionsInNodes(nodes: ADFNode[]): ADFNode[] {
+    const result: ADFNode[] = [];
+    for (const node of nodes) {
+      const processed = this.processMentionsInNode(node);
+      if (Array.isArray(processed)) {
+        result.push(...processed);
+      } else {
+        result.push(processed);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Processes mentions in a single ADF node
+   */
+  private processMentionsInNode(node: ADFNode): ADFNode | ADFNode[] {
+    // Don't process mentions in code blocks
+    if (node.type === 'codeBlock') {
+      return node;
+    }
+
+    if (node.type === 'text') {
+      return this.processMentionsInTextNode(node);
+    } else if (node.content && Array.isArray(node.content)) {
+      return {
+        ...node,
+        content: this.processMentionsInNodes(node.content)
+      };
+    }
+    return node;
+  }
+
+  /**
+   * Processes mentions in a text node
+   */
+  private processMentionsInTextNode(node: ADFNode): ADFNode | ADFNode[] {
+    if (node.type !== 'text' || !node.text) {
+      return node;
+    }
+
+    // Don't process mentions in code nodes
+    if (node.marks && node.marks.some(mark => mark.type === 'code')) {
+      return node;
+    }
+
+    const mentionPattern = /@\[([a-f0-9-]+):([^\]]+)\]/g;
+    const text = node.text;
+    const nodes: ADFNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mentionPattern.exec(text)) !== null) {
+      // Add text before mention
+      if (match.index > lastIndex) {
+        nodes.push({
+          type: 'text',
+          text: text.substring(lastIndex, match.index),
+          marks: node.marks
+        });
+      }
+
+      // Add mention node
+      nodes.push({
+        type: 'mention',
+        attrs: {
+          id: match[1],
+          text: `@${match[2]}`,
+          userType: 'APP'
+        }
+      });
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      nodes.push({
+        type: 'text',
+        text: text.substring(lastIndex),
+        marks: node.marks
+      });
+    }
+
+    // If no mentions found, return original node
+    if (nodes.length === 0) {
+      return node;
+    }
+
+    // If only one node, return it directly
+    if (nodes.length === 1) {
+      return nodes[0];
+    }
+
+    // Multiple nodes - return all of them
+    return nodes;
   }
 
   /**
@@ -440,6 +741,7 @@ export function isMarkdown(text: string): boolean {
     /\[.*?\]\(.*?\)/,        // Links
     /^\s*\|.*\|.*\|/m,       // Tables
     /^---+$/m,               // Horizontal rules
+    /@\[[^:]+:[^\]]+\]/,     // Mentions in format @[id:name]
   ];
 
   return markdownPatterns.some(pattern => pattern.test(text));
