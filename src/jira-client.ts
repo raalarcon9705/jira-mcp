@@ -38,6 +38,7 @@ import { UpdateComment } from 'jira.js/dist/esm/types/version3/parameters/update
 import { CreateIssue } from 'jira.js/dist/esm/types/version3/parameters/createIssue.js';
 import { IssueUpdateDetails } from 'jira.js/dist/esm/types/version3/models/issueUpdateDetails.js';
 import { PartiallyUpdateSprint } from 'jira.js/dist/esm/types/agile/parameters/partiallyUpdateSprint.js';
+import { Document } from 'jira.js/dist/esm/types/version3/models/document.js';
 
 // Load environment variables
 config();
@@ -113,7 +114,7 @@ export class JiraClient {
       };
 
       if (input.description) {
-        issueData.fields.description = input.description;
+        issueData.fields.description = input.description as Document;
       }
 
       if (input.priority) {
@@ -318,28 +319,9 @@ export class JiraClient {
   // Create comment
   async createComment(input: CreateCommentInput) {
     try {
-      // If input.body is a simple string, convert it to basic ADF
-      let adfBody: AddComment['comment'];
-      if (typeof input.body === 'string') {
-        adfBody = {
-          version: 1,
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: input.body
-                }
-              ]
-            }
-          ]
-        };
-      } else {
-        // If input.body is already an ADF object, use it directly
-        adfBody = input.body as AddComment['comment'];
-      }
+      // The schema now handles the conversion from string to ADF
+      // So input.body is already an ADF object
+      const adfBody = input.body as AddComment['comment'];
 
       const response = await this.jira.issueComments.addComment({
         issueIdOrKey: input.issueKey,
@@ -381,28 +363,9 @@ export class JiraClient {
   // Update comment
   async updateComment(input: UpdateCommentInput) {
     try {
-      // If input.body is a simple string, convert it to basic ADF
-      let adfBody: UpdateComment['body'];
-      if (typeof input.body === 'string') {
-        adfBody = {
-          version: 1,
-          type: 'doc',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: input.body
-                }
-              ]
-            }
-          ]
-        };
-      } else {
-        // If input.body is already an ADF object, use it directly
-        adfBody = input.body as UpdateComment['body'];
-      }
+      // The schema now handles the conversion from string to ADF
+      // So input.body is already an ADF object
+      const adfBody = input.body as UpdateComment['body'];
 
       const response = await this.jira.issueComments.updateComment({
         issueIdOrKey: input.issueKey,

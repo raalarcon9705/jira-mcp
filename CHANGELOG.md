@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2025-09-24
+
+### Added
+- **Markdown to ADF Conversion**: Automatic conversion of Markdown to Atlassian Document Format (ADF)
+  - New utility `markdownToADF()` for converting Markdown text to ADF format
+  - Support for all major Markdown elements: headers, lists, code blocks, links, bold, italic, blockquotes
+  - Automatic detection of Markdown syntax in descriptions and comments
+  - Enhanced issue descriptions and comments with rich formatting support
+  - Seamless integration with existing ADF and plain text support
+
+### Changed
+- **Comment API Simplification**: Comments now only accept plain text or Markdown
+  - Removed direct ADF JSON support from comment creation and updates
+  - All comment text is automatically converted to ADF format internally
+  - Simplified API: users only need to provide strings (plain text or Markdown)
+  - Updated tool descriptions to reflect the new simplified interface
+  - Updated Jira client to handle the new ADF conversion flow
+  - Fixed schema validation to use `cast()` instead of `validate()` for proper transformation
+
+### Technical Improvements
+- **Enhanced Markdown Parser**: Improved conversion accuracy and error handling
+- **Schema Validation Updates**: Better handling of string to ADF transformations
+- **Client Integration**: Streamlined ADF handling in Jira client methods
+- **Error Handling**: Improved error messages and fallback mechanisms
+
 ## [1.0.2] - 2025-09-24
 
 ### Added
