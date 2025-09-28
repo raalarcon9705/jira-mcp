@@ -45,23 +45,26 @@ export function createCommentTools(_jiraClient: JiraClient): Tool[] {
     },
     {
       name: 'get_comments',
-      description: 'Get all comments for a Jira issue',
+      description: 'Get comments for a Jira issue with pagination support. Returns comments with pagination metadata to help navigate through large comment lists.',
       inputSchema: {
         type: 'object',
         properties: {
           issueKey: {
             type: 'string',
-            description: 'The issue key to get comments for',
+            description: 'The issue key to get comments for (e.g., "PROJ-123")',
           },
           startAt: {
             type: 'number',
-            description: 'Starting index for pagination',
+            description: 'Starting index for pagination (0-based). Use this to get the next page of comments. Default: 0',
             default: 0,
+            minimum: 0,
           },
           maxResults: {
             type: 'number',
-            description: 'Maximum number of comments to return (1-100)',
+            description: 'Maximum number of comments to return per page (1-100). Use smaller values for faster responses. Default: 50',
             default: 50,
+            minimum: 1,
+            maximum: 100,
           },
         },
         required: ['issueKey'],
@@ -148,19 +151,35 @@ export async function handleCommentTool(
       const validatedArgs = await getCommentsSchema.validate(args);
       const comments = await jiraClient.getComments(validatedArgs);
 
-      // Extract essential fields, improve syntax
+      // Extract essential fields with improved pagination info
       const commentsData = comments;
+      const total = commentsData.total || 0;
+      const startAt = commentsData.startAt || 0;
+      const maxResults = commentsData.maxResults || 50;
+
       const essentialComments = {
-        total: commentsData.total,
-        start: commentsData.startAt, // Shorter field name
-        max: commentsData.maxResults, // Shorter field name
+        pagination: {
+          total,
+          startAt,
+          maxResults,
+          hasNextPage: (startAt + maxResults) < total,
+          hasPreviousPage: startAt > 0,
+          nextStartAt: (startAt + maxResults) < total
+            ? startAt + maxResults
+            : null,
+          previousStartAt: startAt > 0
+            ? Math.max(0, startAt - maxResults)
+            : null,
+        },
         items: commentsData.comments?.map((comment) => ({
           id: comment.id,
-          author: comment.author?.displayName, // Shorter field name
-          authorId: comment.author?.accountId, // Shorter field name
+          author: comment.author?.displayName,
+          authorId: comment.author?.accountId,
           created: comment.created,
+          updated: comment.updated,
           body: comment.body, // Return full body content (ADF format)
-          text: comment.body?.content?.[0]?.content?.[0]?.text || '' // Extract text content for backward compatibility
+          text: comment.body?.content?.[0]?.content?.[0]?.text || '', // Extract text content for backward compatibility
+          visibility: comment.visibility?.type || 'public'
         })) || []
       };
 

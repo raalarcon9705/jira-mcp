@@ -162,73 +162,86 @@ export async function handleIssueTool(
   args: Record<string, unknown>,
   jiraClient: JiraClient
 ) {
-  switch (name) {
-    case 'create_issue': {
-      const validatedArgs = await createIssueSchema.validate(args);
-      const issue = await jiraClient.createIssue(validatedArgs);
+  try {
+    switch (name) {
+      case 'create_issue': {
+        const validatedArgs = await createIssueSchema.validate(args);
+        const issue = await jiraClient.createIssue(validatedArgs);
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Issue ${issue.key} created successfully`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Issue ${issue.key} created successfully`,
+            },
+          ],
+        };
+      }
+
+      case 'get_issue': {
+        const validatedArgs = await getIssueSchema.validate(args);
+        const issue = await jiraClient.getIssue(validatedArgs);
+
+        // Remove custom fields to reduce token usage
+        const cleanIssue = JSON.parse(JSON.stringify(issue, (key, value) => {
+          if (key.startsWith('customfield_')) {
+            return undefined; // Remove custom fields
+          }
+          return value;
+        }));
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(cleanIssue, null, 2),
+            },
+          ],
+        };
+      }
+
+      case 'update_issue': {
+        const validatedArgs = await updateIssueSchema.validate(args);
+        const _result = await jiraClient.updateIssue(validatedArgs);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Issue ${validatedArgs.issueKey} updated successfully`,
+            },
+          ],
+        };
+      }
+
+      case 'delete_issue': {
+        const validatedArgs = await deleteIssueSchema.validate(args);
+        const _result = await jiraClient.deleteIssue(validatedArgs);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Issue ${validatedArgs.issueKey} deleted successfully`,
+            },
+          ],
+        };
+      }
+
+
+      default:
+        throw new Error(`Unknown issue tool: ${name}`);
     }
-
-    case 'get_issue': {
-      const validatedArgs = await getIssueSchema.validate(args);
-      const issue = await jiraClient.getIssue(validatedArgs);
-
-      // Remove custom fields to reduce token usage
-      const cleanIssue = JSON.parse(JSON.stringify(issue, (key, value) => {
-        if (key.startsWith('customfield_')) {
-          return undefined; // Remove custom fields
-        }
-        return value;
-      }));
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(cleanIssue, null, 2),
-          },
-        ],
-      };
-    }
-
-    case 'update_issue': {
-      const validatedArgs = await updateIssueSchema.validate(args);
-      const _result = await jiraClient.updateIssue(validatedArgs);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Issue ${validatedArgs.issueKey} updated successfully`,
-          },
-        ],
-      };
-    }
-
-    case 'delete_issue': {
-      const validatedArgs = await deleteIssueSchema.validate(args);
-      const _result = await jiraClient.deleteIssue(validatedArgs);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Issue ${validatedArgs.issueKey} deleted successfully`,
-          },
-        ],
-      };
-    }
-
-
-    default:
-      throw new Error(`Unknown issue tool: ${name}`);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error in issue operation: ${errorMessage}`,
+        },
+      ],
+      isError: true,
+    };
   }
 }

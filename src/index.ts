@@ -13,6 +13,7 @@ import { createCommentTools, handleCommentTool } from './tools/comments.js';
 import { createTransitionTools, handleTransitionTool } from './tools/transitions.js';
 import { createAssignmentTools, handleAssignmentTool } from './tools/assignments.js';
 import { createSprintTools, handleSprintTool } from './tools/sprints.js';
+import { createWikiTools, handleWikiTool } from './tools/wiki.js';
 
 class JiraMCPServer {
   private server: Server;
@@ -44,6 +45,7 @@ class JiraMCPServer {
       const transitionTools = createTransitionTools(this.jiraClient);
       const assignmentTools = createAssignmentTools(this.jiraClient);
       const sprintTools = createSprintTools(this.jiraClient);
+      const wikiTools = createWikiTools();
 
       return {
         tools: [
@@ -53,6 +55,7 @@ class JiraMCPServer {
           ...transitionTools,
           ...assignmentTools,
           ...sprintTools,
+          ...wikiTools,
         ],
       };
     });
@@ -101,6 +104,8 @@ class JiraMCPServer {
           name.startsWith('close_sprint')
         ) {
           return await handleSprintTool(name, args || {}, this.jiraClient);
+        } else if (name.startsWith('query_wiki')) {
+          return await handleWikiTool(name, args || {});
         } else {
           throw new Error(`Unknown tool: ${name}`);
         }

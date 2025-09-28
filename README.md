@@ -18,11 +18,12 @@ A complete **open source** MCP (Model Context Protocol) server for integrating J
 
 - ✅ **Project Management**: List projects and issue types
 - ✅ **Issue CRUD**: Create, read, update and delete issues
-- ✅ **Comments**: Create, read, update and delete comments
+- ✅ **Comments**: Create, read, update and delete comments with enhanced pagination
 - ✅ **Transitions**: Move issues between states
 - ✅ **Assignments**: Assign issues to users
 - ✅ **User Management**: Search and manage users
 - ✅ **Sprint Management**: Complete agile sprint lifecycle management
+- ✅ **Wiki Integration**: Access Confluence pages by URL identifier with HTML to text conversion
 - ✅ **Rich Text Support**: Markdown to ADF conversion for formatted descriptions and comments
 - ✅ **Validation**: Yup schema validation
 - ✅ **Authentication**: Full Jira Cloud support
@@ -60,17 +61,20 @@ That's it! The server will be automatically downloaded and run when needed.
 ### Option 2: Local Development
 
 1. **Clone the repository**:
+
 ```bash
 git clone https://github.com/raalarcon9705/jira-mcp.git
 cd jira-mcp
 ```
 
 2. **Install dependencies**:
+
 ```bash
 npm install
 ```
 
 3. **Build the project**:
+
 ```bash
 npm run build
 ```
@@ -116,7 +120,7 @@ The server now supports **automatic Markdown to ADF conversion** for issue descr
 
 - **Headers**: `# H1`, `## H2`, `### H3`
 - **Text formatting**: `**bold**`, `*italic*`
-- **Code**: `` `inline code` `` and ```code blocks```
+- **Code**: `` `inline code` `` and `code blocks`
 - **Lists**: `- bullet lists` and `1. numbered lists`
 - **Links**: `[text](url)`
 - **Blockquotes**: `> quoted text`
@@ -127,8 +131,8 @@ The server now supports **automatic Markdown to ADF conversion** for issue descr
 ```javascript
 // Create issue with Markdown description
 create_issue({
-  projectKey: "PROJ",
-  summary: "Bug Report",
+  projectKey: 'PROJ',
+  summary: 'Bug Report',
   description: `# Bug Report
 
 ## Description
@@ -146,12 +150,12 @@ function login(username, password) {
 }
 \`\`\`
 
-> **Note**: This bug was reported by multiple users.`
+> **Note**: This bug was reported by multiple users.`,
 });
 
 // Create comment with Markdown
 create_comment({
-  issueKey: "PROJ-123",
+  issueKey: 'PROJ-123',
   body: `## Update
 
 **Status**: Fixed ✅
@@ -160,7 +164,7 @@ create_comment({
 - [x] Implemented fix
 - [x] Tested solution
 
-The issue has been resolved.`
+The issue has been resolved.`,
 });
 ```
 
@@ -195,13 +199,16 @@ npx @modelcontextprotocol/inspector
 ### Projects
 
 #### `get_projects`
+
 Retrieves all projects accessible to the authenticated user.
 
 **Parameters**:
+
 - `expand` (optional): Additional data to include
 - `recent` (optional): Number of recent projects (0-20)
 
 **Response**: Array of projects with essential fields:
+
 ```json
 [
   {
@@ -214,12 +221,15 @@ Retrieves all projects accessible to the authenticated user.
 ```
 
 #### `get_issue_types`
+
 Gets all available issue types for a specific project.
 
 **Parameters**:
+
 - `projectKey` (required): Project key
 
 **Response**: Array of issue types with essential fields:
+
 ```json
 [
   {
@@ -235,9 +245,11 @@ Gets all available issue types for a specific project.
 ### Issues
 
 #### `create_issue`
+
 Creates a new issue in Jira.
 
 **Parameters**:
+
 - `projectKey` (required): Project key
 - `summary` (required): Issue summary
 - `issueType` (required): Issue type (Bug, Story, Task, etc.)
@@ -252,9 +264,11 @@ Creates a new issue in Jira.
 **Response**: `Issue PROJ-123 created successfully`
 
 #### `get_issue`
+
 Gets details of a specific issue (custom fields removed for token efficiency).
 
 **Parameters**:
+
 - `issueKey` (required): Issue key (e.g., PROJ-123)
 - `expand` (optional): Additional information
 - `fields` (optional): Specific fields to return
@@ -262,9 +276,11 @@ Gets details of a specific issue (custom fields removed for token efficiency).
 **Response**: Complete issue object with custom fields filtered out
 
 #### `update_issue`
+
 Updates an existing issue.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key to update
 - `summary` (optional): New summary
 - `description` (optional): New description
@@ -278,9 +294,11 @@ Updates an existing issue.
 **Response**: `Issue PROJ-123 updated successfully`
 
 #### `delete_issue`
+
 Deletes an issue.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key to delete
 - `deleteSubtasks` (optional): Delete subtasks too (default: false)
 
@@ -289,9 +307,11 @@ Deletes an issue.
 ### Comments
 
 #### `create_comment`
+
 Adds a comment to an issue.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 - `body` (required): Comment text (supports ADF format)
 - `visibility` (optional): Visibility settings
@@ -299,14 +319,17 @@ Adds a comment to an issue.
 **Response**: `Comment 12345 created successfully`
 
 #### `get_comments`
+
 Gets all comments for an issue.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 - `startAt` (optional): Start index (default: 0)
 - `maxResults` (optional): Max comments (1-100, default: 50)
 
 **Response**: Optimized comment structure:
+
 ```json
 {
   "total": 5,
@@ -325,9 +348,11 @@ Gets all comments for an issue.
 ```
 
 #### `update_comment`
+
 Updates an existing comment.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 - `commentId` (required): Comment ID
 - `body` (required): New comment text
@@ -336,9 +361,11 @@ Updates an existing comment.
 **Response**: `Comment 12345 updated successfully`
 
 #### `delete_comment`
+
 Deletes a comment.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 - `commentId` (required): Comment ID
 
@@ -347,12 +374,15 @@ Deletes a comment.
 ### Transitions
 
 #### `get_transitions`
+
 Gets available transitions for an issue.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 
 **Response**: Array of transitions with essential fields:
+
 ```json
 [
   {
@@ -368,9 +398,11 @@ Gets available transitions for an issue.
 ```
 
 #### `transition_issue`
+
 Moves an issue to a different state.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 - `transitionId` (required): Transition ID
 - `comment` (optional): Comment to add during transition
@@ -381,23 +413,28 @@ Moves an issue to a different state.
 ### Assignments
 
 #### `assign_issue`
+
 Assigns an issue to a user.
 
 **Parameters**:
+
 - `issueKey` (required): Issue key
 - `assignee` (required): User account ID
 
 **Response**: `Issue PROJ-123 assigned successfully`
 
 #### `get_users`
+
 Searches for users in Jira.
 
 **Parameters**:
+
 - `query` (optional): Search query by name or email
 - `projectKey` (optional): Filter by project access
 - `maxResults` (optional): Max users (1-100, default: 50)
 
 **Response**: Array of users with essential fields:
+
 ```json
 [
   {
@@ -411,9 +448,11 @@ Searches for users in Jira.
 ```
 
 #### `get_current_user`
+
 Gets information about the current authenticated user.
 
 **Response**: Current user with essential fields:
+
 ```json
 {
   "id": "account-id",
@@ -428,13 +467,16 @@ Gets information about the current authenticated user.
 ### Sprint Management
 
 #### `get_agile_boards`
+
 Gets all agile boards available in the Jira instance. Required to find board IDs for sprint operations.
 
 **Parameters**:
+
 - `projectKey` (optional): Filter boards by project
 - `boardType` (optional): Filter by type (scrum, kanban)
 
 **Response**: Array of boards with essential fields:
+
 ```json
 [
   {
@@ -448,13 +490,16 @@ Gets all agile boards available in the Jira instance. Required to find board IDs
 ```
 
 #### `get_sprints`
+
 Gets all sprints for a specific board. Returns sprint information including ID, name, state, and dates.
 
 **Parameters**:
+
 - `boardId` (required): The ID of the board to get sprints from
 - `state` (optional): Filter sprints by state (active, closed, future)
 
 **Response**: Array of sprints with essential fields:
+
 ```json
 [
   {
@@ -469,9 +514,11 @@ Gets all sprints for a specific board. Returns sprint information including ID, 
 ```
 
 #### `create_sprint`
+
 Creates a new sprint. Sprint name and origin board ID are required. Start date, end date, and goal are optional.
 
 **Parameters**:
+
 - `name` (required): Name of the sprint to create
 - `originBoardId` (required): ID of the board where the sprint will be created
 - `startDate` (optional): Start date of the sprint (ISO 8601 format)
@@ -479,6 +526,7 @@ Creates a new sprint. Sprint name and origin board ID are required. Start date, 
 - `goal` (optional): Goal or objective of the sprint
 
 **Response**: Created sprint with essential fields:
+
 ```json
 {
   "id": 421,
@@ -489,9 +537,11 @@ Creates a new sprint. Sprint name and origin board ID are required. Start date, 
 ```
 
 #### `update_sprint`
+
 Updates sprint information (name, dates, goal, state). Only provided fields will be updated. For closed sprints, only name and goal can be updated.
 
 **Parameters**:
+
 - `sprintId` (required): ID of the sprint to update
 - `name` (optional): New name for the sprint
 - `startDate` (optional): New start date (ISO 8601 format)
@@ -502,38 +552,47 @@ Updates sprint information (name, dates, goal, state). Only provided fields will
 **Response**: `Sprint 421 updated successfully`
 
 #### `close_sprint`
+
 Closes and completes a sprint. This action requires the sprint to be in the "active" state. Once closed, the sprint cannot be reopened.
 
 **Parameters**:
+
 - `sprintId` (required): ID of the sprint to close
 
 **Response**: `Sprint 421 closed successfully`
 
 #### `delete_sprint`
+
 Deletes a sprint. Once deleted, all open issues in the sprint will be moved to the backlog. This action is irreversible.
 
 **Parameters**:
+
 - `sprintId` (required): ID of the sprint to delete
 
 **Response**: `Sprint 421 deleted successfully. All open issues moved to backlog.`
 
 #### `move_issue_to_sprint`
+
 Moves an issue to a specific sprint. Returns a confirmation message. Issues can only be moved to open or active sprints.
 
 **Parameters**:
+
 - `issueKey` (required): Key of the issue to move (e.g., "PROJ-123")
 - `sprintId` (required): ID of the sprint to move the issue to
 
 **Response**: `Issue PROJ-123 moved to sprint 421 successfully`
 
 #### `get_sprint_issues`
+
 Gets all issues for a given sprint. Returns a list of essential issue details (key, summary, status, assignee, priority).
 
 **Parameters**:
+
 - `sprintId` (required): ID of the sprint
 - `maxResults` (optional): Maximum number of issues to return (1-100, default: 50)
 
 **Response**: Array of issues with essential fields:
+
 ```json
 [
   {
@@ -597,16 +656,19 @@ src/
 #### Using MCP Inspector (Recommended)
 
 1. **Install MCP Inspector**:
+
    ```bash
    npm install -g @modelcontextprotocol/inspector
    ```
 
 2. **Build the project**:
+
    ```bash
    npm run build
    ```
 
 3. **Start MCP Inspector**:
+
    ```bash
    npx @modelcontextprotocol/inspector
    ```
@@ -620,6 +682,7 @@ src/
 #### Alternative Testing Methods
 
 **CLI Mode** (for automation and scripting):
+
 ```bash
 # List available tools
 npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/list
@@ -629,6 +692,7 @@ npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/cal
 ```
 
 **Configuration File** (for complex setups):
+
 ```json
 {
   "mcpServers": {
@@ -650,6 +714,7 @@ npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/cal
 #### Advanced Configuration
 
 **Environment Variables** (for advanced users):
+
 ```bash
 # Jira configuration
 export JIRA_HOST="https://your-domain.atlassian.net"
@@ -668,6 +733,7 @@ export MCP_AUTO_OPEN_ENABLED=true
 ```
 
 **Query Parameters** (for direct testing):
+
 ```
 http://localhost:6274/?transport=stdio&serverCommand=node&serverArgs=build/index.js
 ```
@@ -679,6 +745,46 @@ http://localhost:6274/?transport=stdio&serverCommand=node&serverArgs=build/index
 npm run build
 npm start
 ```
+
+### Wiki
+
+#### `query_wiki`
+
+Accesses Confluence pages by URL identifier and returns formatted content.
+
+**Parameters**:
+
+- `query` (required): Page code to search for (like F4CjNw)
+
+**Response**: Markdown-formatted page content with metadata:
+
+```markdown
+# Page Title
+
+**ID:** 933462039
+**Space:** Orderbahn Team (OT)
+**URL:** /spaces/OT/pages/933462039/...
+**Author:** User Name
+**Last Modified:** 2025-09-26T16:35:30.695Z
+**Code:** F4CjNw
+
+## Content
+
+[Page content in plain text with preserved line breaks]
+
+## Page Hierarchy
+
+- Parent Page (page)
+  - Child Page (folder)
+    - Current Page (page)
+```
+
+**Features**:
+
+- Automatic redirect following for short URLs
+- HTML to plain text conversion preserving structure
+- Page hierarchy display
+- Comprehensive error handling
 
 ## Contributing
 
@@ -706,11 +812,13 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
 #### Setting Up Your Environment
 
 1. **Install MCP Inspector** (official testing tool):
+
    ```bash
    npm install -g @modelcontextprotocol/inspector
    ```
 
 2. **Build the project**:
+
    ```bash
    npm run build
    ```
@@ -737,6 +845,7 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
 #### Adding New Features
 
 1. **Create validation schema** in `src/schemas/index.ts`:
+
    ```typescript
    export const yourFeatureSchema = yup.object({
      // Define your schema
@@ -744,6 +853,7 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
    ```
 
 2. **Implement API method** in `src/jira-client.ts`:
+
    ```typescript
    async yourFeature(input: YourFeatureInput) {
      try {
@@ -755,6 +865,7 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
    ```
 
 3. **Create MCP tool** in appropriate file in `src/tools/`:
+
    ```typescript
    {
      name: 'your_tool',
@@ -766,6 +877,7 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
    ```
 
 4. **Register tool** in `src/index.ts`:
+
    ```typescript
    // Add to appropriate handler
    ```
@@ -778,23 +890,27 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
 #### Testing Your Changes
 
 1. **Build the project**:
+
    ```bash
    npm run build
    ```
 
 2. **Test with MCP Inspector**:
+
    ```bash
    npx @modelcontextprotocol/inspector
    ```
+
    - Configure server: STDIO, `node build/index.js`
    - Test all affected tools
    - Verify responses are optimized
 
 3. **Test with CLI mode** (for automation):
+
    ```bash
    # List tools
    npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/list
-   
+
    # Test specific tool
    npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/call --tool-name get_projects
    ```
@@ -818,12 +934,14 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
 #### Creating a Pull Request
 
 1. **Commit your changes** with clear messages:
+
    ```bash
    git add .
    git commit -m "Add new feature: brief description"
    ```
 
 2. **Push to your fork**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -838,20 +956,24 @@ We welcome contributions to the Jira MCP Server! Please follow these guidelines 
 
 ```markdown
 ## Description
+
 Brief description of the changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 - [ ] All existing tests pass
 - [ ] New functionality tested
 - [ ] Response optimization verified
 
 ## Checklist
+
 - [ ] Code follows project standards
 - [ ] Self-review completed
 - [ ] Documentation updated
@@ -966,11 +1088,13 @@ We welcome contributions from the community! This project is open source and we 
 To publish this MCP server to npm for distribution:
 
 1. **Login to npm**:
+
    ```bash
    npm login
    ```
 
 2. **Run the publish script**:
+
    ```bash
    ./publish.sh
    ```
@@ -982,6 +1106,7 @@ To publish this MCP server to npm for distribution:
    ```
 
 The package will be available as `raalarcon-jira-mcp-server` and users can install it with:
+
 ```bash
 npx raalarcon-jira-mcp-server
 ```
