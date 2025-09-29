@@ -1,6 +1,6 @@
 {
   "name": "raalarcon-jira-mcp-server",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "dist/index.js",
   "bin": {
     "jira-mcp": "dist/cli.js"

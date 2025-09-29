@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2025-09-29
+
+### Changed
+
+- **Token Optimization**: Optimized `get_issue` response to minimize token usage
+  - Simplified parent issue information to only include `id` and `key` fields
+  - Simplified subtasks to only include `id` and `key` fields
+  - Reduced response size significantly while maintaining essential information
+  - Improved performance for issues with complex parent-child relationships
+
+### Technical Improvements
+
+- **Response Structure**: Streamlined issue data structure for better efficiency
+- **Token Usage**: Significant reduction in token consumption for issue retrieval
+- **Performance**: Faster response times due to reduced data processing
+
 ## [1.0.6] - 2025-09-28
 
 ### Added

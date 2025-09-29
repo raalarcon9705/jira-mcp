@@ -182,19 +182,83 @@ export async function handleIssueTool(
         const validatedArgs = await getIssueSchema.validate(args);
         const issue = await jiraClient.getIssue(validatedArgs);
 
-        // Remove custom fields to reduce token usage
-        const cleanIssue = JSON.parse(JSON.stringify(issue, (key, value) => {
-          if (key.startsWith('customfield_')) {
-            return undefined; // Remove custom fields
+        // Filter and simplify the issue data
+        const simplifiedIssue = {
+          id: issue.id,
+          key: issue.key,
+          self: issue.self,
+          fields: {
+            summary: issue.fields.summary,
+            description: issue.fields.description,
+            status: {
+              id: issue.fields.status?.id,
+              name: issue.fields.status?.name,
+              statusCategory: {
+                id: issue.fields.status?.statusCategory?.id,
+                key: issue.fields.status?.statusCategory?.key,
+                name: issue.fields.status?.statusCategory?.name
+              }
+            },
+            priority: {
+              id: issue.fields.priority?.id,
+              name: issue.fields.priority?.name
+            },
+            assignee: issue.fields.assignee ? {
+              accountId: issue.fields.assignee.accountId,
+              displayName: issue.fields.assignee.displayName,
+              emailAddress: issue.fields.assignee.emailAddress
+            } : null,
+            reporter: issue.fields.reporter ? {
+              accountId: issue.fields.reporter.accountId,
+              displayName: issue.fields.reporter.displayName,
+              emailAddress: issue.fields.reporter.emailAddress
+            } : null,
+            creator: issue.fields.creator ? {
+              accountId: issue.fields.creator.accountId,
+              displayName: issue.fields.creator.displayName,
+              emailAddress: issue.fields.creator.emailAddress
+            } : null,
+            project: {
+              id: issue.fields.project?.id,
+              key: issue.fields.project?.key,
+              name: issue.fields.project?.name
+            },
+            issuetype: {
+              id: issue.fields.issuetype?.id,
+              name: issue.fields.issuetype?.name,
+              subtask: issue.fields.issuetype?.subtask
+            },
+            parent: issue.fields.parent ? {
+              id: issue.fields.parent.id,
+              key: issue.fields.parent.key
+            } : null,
+            subtasks: issue.fields.subtasks?.map(subtask => ({
+              id: subtask.id,
+              key: subtask.key
+            })) || [],
+            labels: issue.fields.labels || [],
+            components: issue.fields.components?.map(comp => ({
+              id: comp.id,
+              name: comp.name
+            })) || [],
+            fixVersions: issue.fields.fixVersions?.map(version => ({
+              id: version.id,
+              name: version.name,
+              released: version.released
+            })) || [],
+            created: issue.fields.created,
+            updated: issue.fields.updated,
+            duedate: issue.fields.duedate,
+            resolution: issue.fields.resolution,
+            resolutiondate: issue.fields.resolutiondate
           }
-          return value;
-        }));
+        };
 
         return {
           content: [
             {
               type: 'text',
-              text: JSON.stringify(cleanIssue, null, 2),
+              text: JSON.stringify(simplifiedIssue, null, 2),
             },
           ],
         };

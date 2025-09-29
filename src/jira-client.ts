@@ -39,6 +39,7 @@ import { CreateIssue } from 'jira.js/dist/esm/types/version3/parameters/createIs
 import { IssueUpdateDetails } from 'jira.js/dist/esm/types/version3/models/issueUpdateDetails.js';
 import { PartiallyUpdateSprint } from 'jira.js/dist/esm/types/agile/parameters/partiallyUpdateSprint.js';
 import { Document } from 'jira.js/dist/esm/types/version3/models/document.js';
+import { Issue } from 'jira.js/dist/esm/types/version3/models/issue.js';
 
 // Load environment variables
 config();
@@ -149,14 +150,14 @@ export class JiraClient {
   }
 
   // Get issue details
-  async getIssue(input: GetIssueInput) {
+  async getIssue(input: GetIssueInput): Promise<Issue> {
     try {
       const response = await this.jira.issues.getIssue({
         issueIdOrKey: input.issueKey,
         expand: input.expand,
-        fields: input.fields?.filter(field => field !== undefined),
+        fields: input.fields?.filter(field => field !== undefined) as string[],
       });
-      return response;
+      return response as unknown as Issue;
     } catch (error) {
       throw new Error(`Failed to get issue: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
