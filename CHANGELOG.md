@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.8] - 2025-09-30
+
+### Added
+
+- **Subtask Support**: Complete parent-child relationship management for Jira issues
+  - New `parent` field in `create_issue` and `update_issue` tools
+  - Direct subtask creation with parent issue specification
+  - Convert existing issues to subtasks by setting parent relationship
+  - Full support for Jira's hierarchical issue structure
+  - Enhanced issue management with parent-child dependencies
+
+### Changed
+
+- **Enhanced Issue Creation**: `create_issue` tool now supports subtask creation
+  - Added `parent` parameter to specify parent issue key
+  - Automatic parent-child relationship establishment
+  - Support for creating subtasks directly without conversion
+- **Enhanced Issue Updates**: `update_issue` tool now supports subtask conversion
+  - Added `parent` parameter to convert issues to subtasks
+  - Ability to change parent relationships
+  - Convert regular issues to subtasks seamlessly
+
+### Technical Improvements
+
+- **Schema Updates**: Added `parent` field to `createIssueSchema` and `updateIssueSchema`
+- **JiraClient Enhancement**: Updated `createIssue` and `updateIssue` methods to handle parent relationships
+- **Tool Descriptions**: Updated tool descriptions to reflect subtask capabilities
+- **Type Safety**: Full TypeScript support for parent-child relationships
+
+### Fixed
+
+- **Issue Hierarchy**: Proper handling of parent-child relationships in Jira API
+- **Validation**: Enhanced schema validation for parent field
+- **Error Handling**: Improved error messages for subtask operations
+
 ## [1.0.7] - 2025-09-29
 
 ### Changed

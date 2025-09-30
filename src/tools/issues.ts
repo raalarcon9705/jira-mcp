@@ -12,7 +12,7 @@ export function createIssueTools(_jiraClient: JiraClient): Tool[] {
   return [
     {
       name: 'create_issue',
-      description: 'Create a new Jira issue (Bug, Story, Task, Epic, etc.). Returns the created issue key, ID, and URL. Use get_issue_types to find valid issueType values for the project.',
+      description: 'Create a new Jira issue (Bug, Story, Task, Epic, etc.) or subtask. Returns the created issue key, ID, and URL. Use get_issue_types to find valid issueType values for the project. To create a subtask, specify the parent issue key.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -39,6 +39,10 @@ export function createIssueTools(_jiraClient: JiraClient): Tool[] {
           assignee: {
             type: 'string',
             description: 'Account ID of the user to assign the issue to. Use get_users to find account IDs.',
+          },
+          parent: {
+            type: 'string',
+            description: 'Issue key of the parent issue (e.g., "PROJ-123"). Required to create a subtask.',
           },
           labels: {
             type: 'array',
@@ -88,7 +92,7 @@ export function createIssueTools(_jiraClient: JiraClient): Tool[] {
     },
     {
       name: 'update_issue',
-      description: 'Update fields of an existing Jira issue. Only provided fields will be updated. Use get_issue first to see current values. Returns success confirmation.',
+      description: 'Update fields of an existing Jira issue or convert to subtask. Only provided fields will be updated. Use get_issue first to see current values. Returns success confirmation.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -111,6 +115,10 @@ export function createIssueTools(_jiraClient: JiraClient): Tool[] {
           assignee: {
             type: 'string',
             description: 'Account ID of new assignee. Use get_users to find account IDs. Set to null to unassign.',
+          },
+          parent: {
+            type: 'string',
+            description: 'Issue key of the parent issue (e.g., "PROJ-123"). Use to convert issue to subtask or change parent.',
           },
           labels: {
             type: 'array',

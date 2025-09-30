@@ -126,6 +126,10 @@ export class JiraClient {
         issueData.fields.assignee = { accountId: input.assignee };
       }
 
+      if (input.parent) {
+        issueData.fields.parent = { key: input.parent };
+      }
+
       if (input.labels && input.labels.length > 0) {
         issueData.fields.labels = input.labels.filter(label => label !== undefined) as string[];
       }
@@ -184,6 +188,10 @@ export class JiraClient {
 
       if (input.assignee) {
         updateData.fields.assignee = { accountId: input.assignee };
+      }
+
+      if (input.parent) {
+        updateData.fields.parent = { key: input.parent };
       }
 
       if (input.labels) {
