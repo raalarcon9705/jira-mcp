@@ -7,12 +7,47 @@
 [![MCP](https://img.shields.io/badge/MCP-Compatible-blue.svg)](https://modelcontextprotocol.io/)
 [![CI/CD](https://github.com/raalarcon9705/jira-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/raalarcon9705/jira-mcp/actions/workflows/ci.yml)
 
-A complete **open source** MCP (Model Context Protocol) server for integrating Jira/Atlassian with AI applications. This server provides all main Jira dashboard functionalities through a unified API with optimized responses for token efficiency.
+The most complete **open source** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Jira & Atlassian**. Connect any MCP-compatible AI client to your Jira instance in seconds — manage issues, sprints, comments, transitions, users, and Confluence pages without leaving your AI assistant.
+
+```json
+{
+  "mcpServers": {
+    "jira": {
+      "command": "npx",
+      "args": ["-y", "raalarcon-jira-mcp-server"],
+      "env": {
+        "JIRA_HOST": "https://your-domain.atlassian.net",
+        "JIRA_EMAIL": "your-email@example.com",
+        "JIRA_API_TOKEN": "your-api-token"
+      }
+    }
+  }
+}
+```
+
+### Compatible AI Clients
+
+| Client | Supported |
+|--------|-----------|
+| [Claude Desktop](https://claude.ai/download) | ✅ |
+| [Claude Code](https://claude.ai/code) | ✅ |
+| [Cursor](https://cursor.sh) | ✅ |
+| [Windsurf](https://codeium.com/windsurf) | ✅ |
+| [Cline](https://github.com/cline/cline) | ✅ |
+| [Continue](https://continue.dev) | ✅ |
+| Any MCP-compatible client | ✅ |
 
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 [![Contributors](https://img.shields.io/github/contributors/raalarcon9705/jira-mcp.svg)](https://github.com/raalarcon9705/jira-mcp/graphs/contributors)
 [![Stars](https://img.shields.io/github/stars/raalarcon9705/jira-mcp.svg)](https://github.com/raalarcon9705/jira-mcp/stargazers)
+
+### Find This Server On
+
+- [MCP Market](https://mcpmarket.com/) — MCP server marketplace
+- [MCP Servers](https://mcpservers.org/) — Awesome MCP Servers directory
+- [Claude Marketplaces](https://claudemarketplaces.com) — Claude plugins & MCP directory
+- [npm](https://www.npmjs.com/package/raalarcon-jira-mcp-server) — `npx raalarcon-jira-mcp-server`
 
 ## Features
 
@@ -1113,7 +1148,7 @@ npx raalarcon-jira-mcp-server
 
 ## License
 
-ISC
+MIT
 
 ## Support
 

@@ -21,10 +21,12 @@
     "url": "https://github.com/raalarcon9705"
   },
   "license": "MIT",
-  "description": "Open source MCP Server for Jira/Atlassian integration - Install with npx raalarcon-jira-mcp-server",
+  "description": "Open source MCP Server for Jira & Atlassian — manage issues, sprints, comments & Confluence via Claude, Cursor, or any MCP client",
   "keywords": [
     "mcp",
+    "mcp-server",
     "jira",
+    "jira-mcp",
     "atlassian",
     "model-context-protocol",
     "ai",
@@ -32,7 +34,19 @@
     "open-source",
     "typescript",
     "automation",
-    "project-management"
+    "project-management",
+    "claude",
+    "claude-desktop",
+    "claude-mcp",
+    "cursor",
+    "ai-tools",
+    "agile",
+    "sprint",
+    "confluence",
+    "issue-tracker",
+    "atlassian-cloud",
+    "scrum",
+    "kanban"
   ],
   "repository": {
     "type": "git",
@@ -49,7 +63,8 @@
   "files": [
     "dist/**/*",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "mcp.json"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.1",

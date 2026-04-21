@@ -1,0 +1,166 @@
+{
+  "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
+  "name": "raalarcon-jira-mcp-server",
+  "displayName": "Jira MCP Server",
+  "version": "1.0.8",
+  "description": "Open source MCP Server for Jira & Atlassian — manage issues, sprints, comments, transitions, users, and Confluence pages via Claude, Cursor, or any MCP-compatible AI client. Zero config with npx.",
+  "author": {
+    "name": "Reynier Rivero",
+    "email": "raalarcon9705@gmail.com",
+    "url": "https://github.com/raalarcon9705"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/raalarcon9705/jira-mcp",
+  "repository": "https://github.com/raalarcon9705/jira-mcp",
+  "bugs": "https://github.com/raalarcon9705/jira-mcp/issues",
+  "categories": [
+    "project-management",
+    "productivity",
+    "agile",
+    "collaboration"
+  ],
+  "tags": [
+    "jira",
+    "atlassian",
+    "confluence",
+    "agile",
+    "sprint",
+    "project-management",
+    "issue-tracker",
+    "scrum",
+    "kanban"
+  ],
+  "package": {
+    "registry": "npm",
+    "name": "raalarcon-jira-mcp-server",
+    "runtime": "node",
+    "minNodeVersion": "18"
+  },
+  "mcpConfig": {
+    "command": "npx",
+    "args": ["-y", "raalarcon-jira-mcp-server"],
+    "env": {
+      "JIRA_HOST": {
+        "description": "Your Atlassian domain URL (e.g. https://your-domain.atlassian.net)",
+        "required": true,
+        "example": "https://your-domain.atlassian.net"
+      },
+      "JIRA_EMAIL": {
+        "description": "Your Jira account email address",
+        "required": true,
+        "example": "user@example.com"
+      },
+      "JIRA_API_TOKEN": {
+        "description": "Jira API token from https://id.atlassian.com/manage-profile/security/api-tokens",
+        "required": true,
+        "sensitive": true
+      }
+    }
+  },
+  "compatibleClients": [
+    "claude-desktop",
+    "claude-code",
+    "cursor",
+    "windsurf",
+    "cline",
+    "continue"
+  ],
+  "tools": [
+    {
+      "name": "get_projects",
+      "description": "List all Jira projects accessible to the authenticated user"
+    },
+    {
+      "name": "get_issue_types",
+      "description": "Get all available issue types for a specific project"
+    },
+    {
+      "name": "create_issue",
+      "description": "Create a new Jira issue with full field support and Markdown descriptions"
+    },
+    {
+      "name": "get_issue",
+      "description": "Get details of a specific issue by key (token-optimized response)"
+    },
+    {
+      "name": "update_issue",
+      "description": "Update an existing issue's fields"
+    },
+    {
+      "name": "delete_issue",
+      "description": "Delete an issue and optionally its subtasks"
+    },
+    {
+      "name": "create_comment",
+      "description": "Add a comment to an issue (supports Markdown, auto-converted to ADF)"
+    },
+    {
+      "name": "get_comments",
+      "description": "Get all comments for an issue with pagination"
+    },
+    {
+      "name": "update_comment",
+      "description": "Update an existing comment"
+    },
+    {
+      "name": "delete_comment",
+      "description": "Delete a comment from an issue"
+    },
+    {
+      "name": "get_transitions",
+      "description": "Get available workflow transitions for an issue"
+    },
+    {
+      "name": "transition_issue",
+      "description": "Move an issue to a different workflow state"
+    },
+    {
+      "name": "assign_issue",
+      "description": "Assign an issue to a user"
+    },
+    {
+      "name": "get_users",
+      "description": "Search for users in the Jira instance"
+    },
+    {
+      "name": "get_current_user",
+      "description": "Get information about the authenticated user"
+    },
+    {
+      "name": "get_agile_boards",
+      "description": "List all agile boards (scrum and kanban)"
+    },
+    {
+      "name": "get_sprints",
+      "description": "Get all sprints for a board, filterable by state"
+    },
+    {
+      "name": "create_sprint",
+      "description": "Create a new sprint on a board"
+    },
+    {
+      "name": "update_sprint",
+      "description": "Update sprint name, dates, goal, or state"
+    },
+    {
+      "name": "close_sprint",
+      "description": "Close and complete an active sprint"
+    },
+    {
+      "name": "delete_sprint",
+      "description": "Delete a sprint (open issues moved to backlog)"
+    },
+    {
+      "name": "move_issue_to_sprint",
+      "description": "Move an issue into a specific sprint"
+    },
+    {
+      "name": "get_sprint_issues",
+      "description": "Get all issues assigned to a sprint"
+    },
+    {
+      "name": "query_wiki",
+      "description": "Access Confluence pages by URL code with HTML-to-text conversion"
+    }
+  ]
+}
