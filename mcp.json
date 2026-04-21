@@ -2,8 +2,8 @@
   "$schema": "https://registry.modelcontextprotocol.io/schema/server.json",
   "name": "raalarcon-jira-mcp-server",
   "displayName": "Jira MCP Server",
-  "version": "1.0.81",
-  "description": "Open source MCP Server for Jira & Atlassian — manage issues, sprints, comments, transitions, users, and Confluence pages via Claude, Cursor, or any MCP-compatible AI client. Zero config with npx.",
+  "version": "1.0.82",
+  "description": "Open source MCP Server for Jira & Atlassian — manage issues, sprints, comments, transitions, users, and Confluence pages via Claude, Cursor, or any MCP-compatible AI client. No install, just npx.",
   "author": {
     "name": "Reynier Rivero",
     "email": "raalarcon9705@gmail.com",

@@ -1,6 +1,6 @@
 {
   "name": "raalarcon-jira-mcp-server",
-  "version": "1.0.81",
+  "version": "1.0.82",
   "mcpName": "io.github.raalarcon9705/jira-mcp",
   "main": "dist/index.js",
   "bin": {

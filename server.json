@@ -1,0 +1,44 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.raalarcon9705/jira-mcp",
+  "description": "Jira & Confluence MCP: 24 tools for issues, sprints, comments, transitions & wiki. Run via npx.",
+  "repository": {
+    "url": "https://github.com/raalarcon9705/jira-mcp",
+    "source": "github"
+  },
+  "version": "1.0.82",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "raalarcon-jira-mcp-server",
+      "version": "1.0.82",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "JIRA_HOST",
+          "description": "Your Atlassian domain URL (e.g. https://your-domain.atlassian.net)",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "JIRA_EMAIL",
+          "description": "Your Jira account email address",
+          "isRequired": true,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "JIRA_API_TOKEN",
+          "description": "Jira API token from https://id.atlassian.com/manage-profile/security/api-tokens",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
