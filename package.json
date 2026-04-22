@@ -65,7 +65,8 @@
     "dist/**/*",
     "README.md",
     "LICENSE",
-    "mcp.json"
+    "mcp.json",
+    "glama.json"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.1",

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://glama.ai/mcp/glama.schema.json",
+  "name": "Jira MCP Server",
+  "description": "Open source MCP server for Jira & Atlassian. Manage issues, sprints, comments, transitions, user assignments, and Confluence wiki pages via any MCP-compatible AI client.",
+  "categories": [
+    "project-management",
+    "productivity",
+    "agile"
+  ],
+  "keywords": [
+    "jira",
+    "atlassian",
+    "confluence",
+    "agile",
+    "sprint",
+    "mcp",
+    "model-context-protocol",
+    "project-management",
+    "issue-tracker"
+  ]
+}
