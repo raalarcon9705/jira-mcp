@@ -28,9 +28,9 @@ interface GenericToken {
   start?: number;
   items?: GenericToken[];
   lang?: string;
-  header?: string[];
-  align?: string[];
-  cells?: string[][];
+  header?: GenericToken[];
+  align?: (string | null)[];
+  rows?: GenericToken[][];
   [key: string]: unknown;
 }
 
@@ -411,57 +411,56 @@ export class MarkdownToADFConverter {
   }
 
   /**
-   * Converts a table token to ADF table node
+   * Converts a table token to ADF table node.
+   *
+   * marked >= 12 emits the header as an array of cell objects (`{ text, tokens }`)
+   * and the body as `rows` (array of rows of cell objects) — the legacy
+   * `header: string[]` / `cells: string[][]` shape no longer exists. Reading the
+   * old shape produced an empty/invalid table that Jira rejected, so tables
+   * could not be sent at all. We now read header/rows and render each cell's
+   * inline tokens, so formatting and links inside cells are preserved.
    */
   private convertTable(token: GenericToken): ADFNode {
     const content: ADFNode[] = [];
 
-    if (token.header && token.cells) {
-      // Add header row
-      const headerRow: ADFNode = {
-        type: 'tableRow',
-        content: token.header.map(cell => ({
-          type: 'tableHeader',
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  type: 'text',
-                  text: cell
-                }
-              ]
-            }
-          ]
-        }))
-      };
-      content.push(headerRow);
+    const buildCellContent = (cell: GenericToken): ADFNode[] => {
+      const inline: ADFNode[] = [];
+      if (cell.tokens && cell.tokens.length > 0) {
+        for (const inlineToken of cell.tokens) {
+          inline.push(...this.convertInlineToken(inlineToken));
+        }
+      } else if (cell.text) {
+        inline.push({ type: 'text', text: cell.text });
+      }
+      // A table cell must contain at least one block node; an empty paragraph is valid.
+      return [{ type: 'paragraph', content: inline }];
+    };
 
-      // Add data rows
-      for (const row of token.cells) {
-        const tableRow: ADFNode = {
-          type: 'tableRow',
-          content: row.map(cell => ({
-            type: 'tableCell',
-            content: [
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    type: 'text',
-                    text: cell
-                  }
-                ]
-              }
-            ]
-          }))
-        };
-        content.push(tableRow);
+    const buildRow = (cells: GenericToken[], isHeader: boolean): ADFNode => ({
+      type: 'tableRow',
+      content: cells.map(cell => ({
+        type: isHeader ? 'tableHeader' : 'tableCell',
+        attrs: {},
+        content: buildCellContent(cell)
+      }))
+    });
+
+    if (token.header && token.header.length > 0) {
+      content.push(buildRow(token.header, true));
+    }
+
+    if (token.rows && token.rows.length > 0) {
+      for (const row of token.rows) {
+        content.push(buildRow(row, false));
       }
     }
 
     return {
       type: 'table',
+      attrs: {
+        isNumberColumnEnabled: false,
+        layout: 'default'
+      },
       content: content
     };
   }

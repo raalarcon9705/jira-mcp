@@ -553,5 +553,79 @@ Por favor, @[6418727f9d6383e32a3261b0:Reynier Rivero], confirma que las mencione
         ]
       });
     });
+
+    test('should convert a markdown table to an ADF table', () => {
+      const markdown = [
+        '| Name | Status |',
+        '|------|--------|',
+        '| PR   | Open   |',
+        '| CI   | Green  |'
+      ].join('\n');
+
+      const result = markdownToADF(markdown) as TestADFDocument;
+
+      const table = result.content[0] as {
+        type: string;
+        attrs?: Record<string, unknown>;
+        content: Array<{
+          type: string;
+          content: Array<{
+            type: string;
+            content: Array<{ type: string; content: TestADFTextNode[] }>;
+          }>;
+        }>;
+      };
+
+      expect(table.type).toBe('table');
+      expect(table.attrs).toEqual({ isNumberColumnEnabled: false, layout: 'default' });
+      // 1 header row + 2 data rows
+      expect(table.content).toHaveLength(3);
+
+      // Header row uses tableHeader cells
+      const headerRow = table.content[0];
+      expect(headerRow.type).toBe('tableRow');
+      expect(headerRow.content.map(c => c.type)).toEqual(['tableHeader', 'tableHeader']);
+      expect(headerRow.content[0].content[0]).toEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Name' }]
+      });
+
+      // Data row uses tableCell cells
+      const firstDataRow = table.content[1];
+      expect(firstDataRow.content.map(c => c.type)).toEqual(['tableCell', 'tableCell']);
+      expect(firstDataRow.content[1].content[0]).toEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Open' }]
+      });
+    });
+
+    test('should preserve inline formatting and links inside table cells', () => {
+      const markdown = [
+        '| Item | Link |',
+        '|------|------|',
+        '| **bold** | [PR](https://example.com/pr) |'
+      ].join('\n');
+
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const table = result.content[0] as {
+        content: Array<{
+          content: Array<{ content: Array<{ content: TestADFTextNode[] }> }>;
+        }>;
+      };
+
+      const dataRow = table.content[1];
+      // bold cell
+      expect(dataRow.content[0].content[0].content).toContainEqual({
+        type: 'text',
+        text: 'bold',
+        marks: [{ type: 'strong' }]
+      });
+      // link cell
+      expect(dataRow.content[1].content[0].content).toContainEqual({
+        type: 'text',
+        text: 'PR',
+        marks: [{ type: 'link', attrs: { href: 'https://example.com/pr' } }]
+      });
+    });
   });
 });
