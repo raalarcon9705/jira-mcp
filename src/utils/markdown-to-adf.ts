@@ -492,7 +492,7 @@ export class MarkdownToADFConverter {
       // Apply formatting to all text nodes
       return nodes.map(node => {
         if (node.type === 'text') {
-          return this.applyFormatting(node, token.type);
+          return this.applyFormatting(node, token);
         }
         return node;
       });
@@ -551,17 +551,22 @@ export class MarkdownToADFConverter {
   }
 
   /**
-   * Applies formatting to a text node
+   * Applies a mark to a text node based on the inline token type.
+   *
+   * Handles links (and code spans) in addition to the basic text styles so
+   * that nested inline tokens — e.g. `[text](url)`, autolinks `<url>`, GFM
+   * bare URLs, or a bold word inside a link — keep their `link` mark (with
+   * `href`/`title`) instead of being flattened to plain text.
    */
-  private applyFormatting(node: ADFNode, formatType: string): ADFNode {
+  private applyFormatting(node: ADFNode, token: GenericToken): ADFNode {
     if (node.type !== 'text') {
       return node;
     }
 
     const existingMarks = node.marks || [];
-    let newMark;
+    let newMark: ADFMark;
 
-    switch (formatType) {
+    switch (token.type) {
       case 'strong':
         newMark = { type: 'strong' };
         break;
@@ -571,8 +576,24 @@ export class MarkdownToADFConverter {
       case 'del':
         newMark = { type: 'strike' };
         break;
+      case 'codespan':
+        newMark = { type: 'code' };
+        break;
+      case 'link':
+        newMark = {
+          type: 'link',
+          attrs: token.title
+            ? { href: token.href || '', title: token.title }
+            : { href: token.href || '' }
+        };
+        break;
       default:
         return node;
+    }
+
+    // Avoid stacking a duplicate mark of the same type.
+    if (existingMarks.some(mark => mark.type === newMark.type)) {
+      return node;
     }
 
     return {
