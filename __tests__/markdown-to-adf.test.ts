@@ -474,5 +474,158 @@ Por favor, @[6418727f9d6383e32a3261b0:Reynier Rivero], confirma que las mencione
         marks: [{ type: 'strike' }, { type: 'strong' }, { type: 'em' }]
       });
     });
+
+    test('should convert inline link [text](url) to a link mark', () => {
+      const markdown = 'See [PR #117](https://github.com/AvantoDev/ai-python-agentic-ocr/pull/117) please';
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const paragraph = result.content[0] as TestADFParagraph;
+
+      expect(paragraph.content).toContainEqual({
+        type: 'text',
+        text: 'PR #117',
+        marks: [
+          {
+            type: 'link',
+            attrs: { href: 'https://github.com/AvantoDev/ai-python-agentic-ocr/pull/117' }
+          }
+        ]
+      });
+    });
+
+    test('should convert an autolink <url> to a link mark', () => {
+      const markdown = '<https://example.com/foo>';
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const paragraph = result.content[0] as TestADFParagraph;
+
+      expect(paragraph.content).toContainEqual({
+        type: 'text',
+        text: 'https://example.com/foo',
+        marks: [{ type: 'link', attrs: { href: 'https://example.com/foo' } }]
+      });
+    });
+
+    test('should keep the link title when present', () => {
+      const markdown = '[docs](https://example.com "Docs Home")';
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const paragraph = result.content[0] as TestADFParagraph;
+
+      expect(paragraph.content).toContainEqual({
+        type: 'text',
+        text: 'docs',
+        marks: [
+          {
+            type: 'link',
+            attrs: { href: 'https://example.com', title: 'Docs Home' }
+          }
+        ]
+      });
+    });
+
+    test('should preserve a link inside a list item', () => {
+      const markdown = '- FE PR: [#382](https://github.com/AvantoDev/front-react-strata-ui/pull/382)';
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const bulletList = result.content[0] as TestADFBulletList;
+      const itemContent = bulletList.content[0].content[0].content;
+
+      expect(itemContent).toContainEqual({
+        type: 'text',
+        text: '#382',
+        marks: [
+          {
+            type: 'link',
+            attrs: { href: 'https://github.com/AvantoDev/front-react-strata-ui/pull/382' }
+          }
+        ]
+      });
+    });
+
+    test('should keep a bold word inside a link with both marks', () => {
+      const markdown = '[**bold** link](https://example.com)';
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const paragraph = result.content[0] as TestADFParagraph;
+
+      expect(paragraph.content).toContainEqual({
+        type: 'text',
+        text: 'bold',
+        marks: [
+          { type: 'strong' },
+          { type: 'link', attrs: { href: 'https://example.com' } }
+        ]
+      });
+    });
+
+    test('should convert a markdown table to an ADF table', () => {
+      const markdown = [
+        '| Name | Status |',
+        '|------|--------|',
+        '| PR   | Open   |',
+        '| CI   | Green  |'
+      ].join('\n');
+
+      const result = markdownToADF(markdown) as TestADFDocument;
+
+      const table = result.content[0] as {
+        type: string;
+        attrs?: Record<string, unknown>;
+        content: Array<{
+          type: string;
+          content: Array<{
+            type: string;
+            content: Array<{ type: string; content: TestADFTextNode[] }>;
+          }>;
+        }>;
+      };
+
+      expect(table.type).toBe('table');
+      expect(table.attrs).toEqual({ isNumberColumnEnabled: false, layout: 'default' });
+      // 1 header row + 2 data rows
+      expect(table.content).toHaveLength(3);
+
+      // Header row uses tableHeader cells
+      const headerRow = table.content[0];
+      expect(headerRow.type).toBe('tableRow');
+      expect(headerRow.content.map(c => c.type)).toEqual(['tableHeader', 'tableHeader']);
+      expect(headerRow.content[0].content[0]).toEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Name' }]
+      });
+
+      // Data row uses tableCell cells
+      const firstDataRow = table.content[1];
+      expect(firstDataRow.content.map(c => c.type)).toEqual(['tableCell', 'tableCell']);
+      expect(firstDataRow.content[1].content[0]).toEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Open' }]
+      });
+    });
+
+    test('should preserve inline formatting and links inside table cells', () => {
+      const markdown = [
+        '| Item | Link |',
+        '|------|------|',
+        '| **bold** | [PR](https://example.com/pr) |'
+      ].join('\n');
+
+      const result = markdownToADF(markdown) as TestADFDocument;
+      const table = result.content[0] as {
+        content: Array<{
+          content: Array<{ content: Array<{ content: TestADFTextNode[] }> }>;
+        }>;
+      };
+
+      const dataRow = table.content[1];
+      // bold cell
+      expect(dataRow.content[0].content[0].content).toContainEqual({
+        type: 'text',
+        text: 'bold',
+        marks: [{ type: 'strong' }]
+      });
+      // link cell
+      expect(dataRow.content[1].content[0].content).toContainEqual({
+        type: 'text',
+        text: 'PR',
+        marks: [{ type: 'link', attrs: { href: 'https://example.com/pr' } }]
+      });
+    });
   });
 });
